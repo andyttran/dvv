@@ -28,7 +28,7 @@ var loadChunk = function(url, callback, timeout) {
 };
 
 var outputMsg = function(data) {
-  console.log("JSON inside callback ", data)
+  console.log("JSON inside callback ", data);
 }
 
 var getData = function(){
