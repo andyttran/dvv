@@ -1,24 +1,24 @@
-//require dependencies
-var express = require('express'),
-  http = require('http'),
-  favicon = require('serve-favicon');
-
-//create express instance
+var express = require('express');
 var app = express();
-
-//used to render static files
-app.use(express.static(__dirname + '/'));
-
-//TODO: not yet done, used to render favicon 
-app.use(favicon(__dirname + '/assets/favicon.ico'));
-
+//create server
+var server = require('http').createServer(app);
+//create the socket.io instance attached to the express instance
+var io = require('socket.io')(server);
 var port = process.env.PORT || 8000;
+
+var favicon = require('serve-favicon');
+
+// make server listen to port!
+server.listen(port, function() {
+  console.log('Server listening on port ' + port);
+});
+
+//tell express where to serve static files from
+app.use(express.static(__dirname + '/../client'));
+
+//tell express where to find the favicon
+// app.use(favicon(__dirname + '/../client/assets/favicon.ico'));
 
 app.get('/', function(req, res){
 	res.render('index');
-});
-
-// start up the server!
-var server = http.createServer(app).listen(port, function() {
-  console.log('Server listening on port ' + port);
 });
