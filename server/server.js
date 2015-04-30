@@ -22,3 +22,7 @@ app.use(express.static(__dirname + '/../client'));
 app.get('/', function(req, res){
 	res.render('index');
 });
+
+app.get('/getData', function(req, res){
+	res.send('hey guys');
+})
