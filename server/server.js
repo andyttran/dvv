@@ -42,9 +42,11 @@ io.of('/').on('connection', function(socket){
 	socket.on('completed', function(data){
 		completedData.push(data);
 		console.log(completedData);
-		socket.emit('data',{
-			chunk: partitionedData[i++]
-		})
+		if (i < partitionedData.length){
+			socket.emit('data',{
+				chunk: partitionedData[i++]
+			})
+		}
 	});
 
 	socket.on('disconnect', function(socket){
