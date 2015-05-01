@@ -48,19 +48,24 @@ var createMatrixArrays = function(matrixSize, arrayLength){
 };
 
 var availableClients = [];
-var partitionedData = createMatrixArrays(300, 10);
+//var partitionedData = createMatrixArrays(300, 10);
+var partitionedData = [1,2,3];
 var i = 0;
 var completedData = [];
 var flag = true;
 io.of('/').on('connection', function(socket){
-	if(flag){
+	socket.join('slave');
+  if(flag){
 		console.time('andy');
 		flag = false;
 	}
 	console.log('new connection');
 	availableClients.push(socket);
+  socket.broadcast.to('slave').emit('clientChange', { 
+    availableClients : availableClients.length 
+  });
 	if (i < partitionedData.length){
-		socket.emit('data', {
+		socket.to('slave').emit('data', {
 			chunk : partitionedData[i++]
 		});
 	}
@@ -71,13 +76,16 @@ io.of('/').on('connection', function(socket){
 			console.timeEnd('andy');
 		}
 		if (i < partitionedData.length){
-			socket.emit('data',{
+			socket.to('slave').emit('data',{
 				chunk: partitionedData[i++]
 			});
 		}
 	});
 
-	socket.on('disconnect', function(socket){
-		availableClients.indexOf(socket);
+	socket.on('disconnect', function(){
+		availableClients.splice(availableClients.indexOf(socket), 1);
+    socket.broadcast.to('slave').emit('clientChange', { 
+      availableClients : availableClients.length 
+    });
 	});
 });
