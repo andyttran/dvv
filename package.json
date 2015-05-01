@@ -1,0 +1,24 @@
+{
+  "name": "dvv-global",
+  "version": "1.0.0",
+  "description": "global dpendencies",
+  "main": "index.js",
+  "dependencies": {
+    "grunt": "^0.4.5",
+    "grunt-contrib-jshint": "^0.11.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dvvjs/dvv.git"
+  },
+  "author": "dvv",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dvvjs/dvv/issues"
+  },
+  "homepage": "http://dvv.io"
+}
