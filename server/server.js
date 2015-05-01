@@ -23,6 +23,30 @@ app.get('/', function(req, res){
 	res.render('index');
 });
 
-app.get('/getData', function(req, res){
-	res.send('hey guys');
-})
+// app.get('/getData', function(req, res){
+// 	res.send('hey guys');
+// });
+
+var availableClients = [];
+var partitionedData = [1, 2, 3];
+var i = 0;
+var completedData = [];
+
+io.of('/').on('connection', function(socket){
+	console.log('new connection');
+	availableClients.push(socket);
+	socket.emit('data', {
+		chunk : partitionedData[i++]
+	});
+
+	socket.on('completed', function(data){
+		completedData.push(data);
+		socket.emit('data',{
+			chunk: partitionedData[i++]
+		})
+	});
+
+	socket.on('disconnect', function(socket){
+		availableClients.indexOf(socket)
+	})
+});
