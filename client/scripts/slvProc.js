@@ -1,7 +1,7 @@
 
 var socket = io.connect();
 
-var process = function(data, cb){
+var asyncprocess = function(data, cb){
   cb(data, function(result){
     console.log("SENDING: ", result);
     socket.emit('completed', {
@@ -16,7 +16,11 @@ var doubler = function(data, cb) {
 
 socket.on('data', function(data) {
   console.log("ON DATA: ", data);
-  process(data.chunk, doubler);
+  // process(data.chunk, doubler);
+  var result = math.inv(data.chunk);
+  socket.emit('completed', {
+  	"result": result
+  });
 });
 
 

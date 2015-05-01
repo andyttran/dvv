@@ -27,21 +27,49 @@ app.get('/', function(req, res){
 // 	res.send('hey guys');
 // });
 
+var createMatrixArrays = function(matrixSize, arrayLength){
+  var randomArray = function(n){
+    var result = [];
+    for(var i = 0; i < n ; i++){
+      var row = [];
+      for (var j = 0; j < n; j++){
+        row.push(Math.floor(Math.random()*100));
+      }
+      result.push(row);
+    }
+    return result;
+  }
+
+  var result = [];
+  for(var i = 0; i < arrayLength; i++){
+    result.push(randomArray(matrixSize));
+  }
+  return result;
+};
+
 var availableClients = [];
-var partitionedData = [1, 2, 3];
+var partitionedData = createMatrixArrays(300, 10);
 var i = 0;
 var completedData = [];
-
+var flag = true;
 io.of('/').on('connection', function(socket){
+	if(flag){
+		console.time('andy');
+		flag = false;
+	}
 	console.log('new connection');
 	availableClients.push(socket);
-	socket.emit('data', {
-		chunk : partitionedData[i++]
-	});
+	if (i < partitionedData.length){
+		socket.emit('data', {
+			chunk : partitionedData[i++]
+		});
+	}
 
 	socket.on('completed', function(data){
 		completedData.push(data);
-		console.log(completedData);
+		if (completedData.length === 10){
+			console.timeEnd('andy');
+		}
 		if (i < partitionedData.length){
 			socket.emit('data',{
 				chunk: partitionedData[i++]
