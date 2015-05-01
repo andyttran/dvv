@@ -1,11 +1,9 @@
 
-// on 
-// on data
-
 var socket = io.connect();
 
 var process = function(data, cb){
   cb(data, function(result){
+    console.log("SENDING: ", result);
     socket.emit('completed', {
       "result":result
     });
@@ -13,15 +11,12 @@ var process = function(data, cb){
 }
 
 var doubler = function(data, cb) {
-  var res = [];
-  data.forEach(function(val) {
-    res.push(val*2);
-  });
-  cb(res);
+  cb(data * 2);
 };
 
 socket.on('data', function(data) {
-  process(JSON.stringify(data), doubler);
+  console.log("ON DATA: ", data);
+  process(data.chunk, doubler);
 });
 
 
