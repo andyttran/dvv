@@ -16,7 +16,7 @@ var doubler = function(data, cb) {
 
 socket.on('data', function(data) {
   console.log("ON DATA: ", data);
-  process(JSON.stringify(data), doubler);
+  process(data.chunk, doubler);
 });
 
 
