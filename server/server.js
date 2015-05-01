@@ -38,7 +38,7 @@ var createMatrixArrays = function(matrixSize, arrayLength){
       result.push(row);
     }
     return result;
-  }
+  };
 
   var result = [];
   for(var i = 0; i < arrayLength; i++){
@@ -73,11 +73,11 @@ io.of('/').on('connection', function(socket){
 		if (i < partitionedData.length){
 			socket.emit('data',{
 				chunk: partitionedData[i++]
-			})
+			});
 		}
 	});
 
 	socket.on('disconnect', function(socket){
-		availableClients.indexOf(socket)
-	})
+		availableClients.indexOf(socket);
+	});
 });
