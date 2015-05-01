@@ -8,7 +8,7 @@ var process = function(data, cb){
       "result":result
     });
   });
-}
+};
 
 var doubler = function(data, cb) {
   cb(data * 2);
