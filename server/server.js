@@ -54,7 +54,8 @@ var pendingPackets = {};
 var completedPackets = new minHeap();
 
 //Dummy data consisting of 10, 100 X 100 arrays
-var partitionedData = createMatrixArrays(100, 10);
+// var partitionedData = createMatrixArrays(100, 10);
+var partitionedData = [1,2,3];
 
 //Insert the data into the unsentPackets heap
 var counter = 0;
@@ -85,12 +86,13 @@ io.of('/').on('connection', function(socket){
     console.log('Client Ready');
     if (unsentPackets.size() > 0) {
       socket.emit('data', {
-        unsentPackets.getMin()
+        chunk: unsentPackets.getMin()
      });
     }
   });
 
 	socket.on('completed', function(data){
+    console.log(data);
     completedPackets.insert(data);
 
     //Update everyone on the current progress
@@ -101,10 +103,18 @@ io.of('/').on('connection', function(socket){
 		if (completedPackets.size() === partitionedData.length ){
       console.log("COMPUTATION COMPLETE");
 			console.timeEnd('timer');
+      var finishedResults = [];
+      while(completedPackets.size() > 0){
+        finishedResults.push(completedPackets.getMin().result);
+      }
+      console.log(finishedResults);
+      /************************
+      FURTHER CALCULATIONS MAY BE DONE HERE
+      */
       io.emit('complete');
 		} else {
       socket.emit('data',{
-        unsentPackets.getMin()
+        chunk: unsentPackets.getMin()
       });
     }
 	});
