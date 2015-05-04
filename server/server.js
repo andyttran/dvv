@@ -48,38 +48,46 @@ var createMatrixArrays = function(matrixSize, arrayLength){
 };
 
 var availableClients = [];
-//var partitionedData = createMatrixArrays(300, 10);
-var partitionedData = [1,2,3];
+var partitionedData = createMatrixArrays(100, 10);
+//var partitionedData = [1,2,3];
 var i = 0;
 var completedData = [];
 var flag = true;
 io.of('/').on('connection', function(socket){
 	socket.join('slave');
   if(flag){
-		console.time('andy');
+		console.time('timer');
 		flag = false;
 	}
+
 	console.log('new connection');
 	availableClients.push(socket);
-  socket.broadcast.to('slave').emit('clientChange', { 
+  io.emit('clientChange', { 
     availableClients : availableClients.length 
   });
-	if (i < partitionedData.length){
-		socket.to('slave').emit('data', {
-			chunk : partitionedData[i++]
-		});
-	}
+
+  socket.on('ready', function() {
+    console.log('Client Ready');
+    if (i < partitionedData.length) {
+      socket.emit('data', {
+        chunk : partitionedData[i++]
+     });
+    }
+  });
 
 	socket.on('completed', function(data){
-		completedData.push(data);
-		if (completedData.length === 10){
-			console.timeEnd('andy');
-		}
-		if (i < partitionedData.length){
-			socket.to('slave').emit('data',{
-				chunk: partitionedData[i++]
-			});
-		}
+    completedData.push(data);
+    io.emit('progress', { 
+      progress : completedData.length / partitionedData.length
+    });
+		if (completedData.length === partitionedData.length ){
+      console.log("COMPUTATION COMPLETE")
+			console.timeEnd('timer');
+		} else {
+      socket.emit('data',{
+        chunk: partitionedData[i++]
+      });
+    }
 	});
 
 	socket.on('disconnect', function(){
