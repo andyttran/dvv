@@ -1,32 +1,32 @@
 var express = require('express');
 var app = express();
-//create server
+
+//Create server
 var server = require('http').createServer(app);
-//create the socket.io instance attached to the express instance
+
+//Create the socket.io instance attached to the express instance
 var io = require('socket.io')(server);
 var port = process.env.PORT || 8000;
 
 var favicon = require('serve-favicon');
+var minHeap = require('./MinHeap.js');
 
-// make server listen to port!
+// Start the server
 server.listen(port, function() {
   console.log('Server listening on port ' + port);
 });
 
-//tell express where to serve static files from
+//Tell express where to serve static files from
 app.use(express.static(__dirname + '/../client'));
 
-//tell express where to find the favicon
+//TODO: tell express where to find the favicon
 // app.use(favicon(__dirname + '/../client/assets/favicon.ico'));
 
 app.get('/', function(req, res){
 	res.render('index');
 });
 
-// app.get('/getData', function(req, res){
-// 	res.send('hey guys');
-// });
-
+//Function to create arrays for testing purposes
 var createMatrixArrays = function(matrixSize, arrayLength){
   var randomArray = function(n){
     var result = [];
@@ -47,12 +47,27 @@ var createMatrixArrays = function(matrixSize, arrayLength){
   return result;
 };
 
+//Initialize all data structures we'll need
 var availableClients = [];
-var partitionedData = createMatrixArrays(200, 10);
-var i = 0;
-var completedData = [];
+var unsentPackets = new minHeap();
+var pendingPackets = {};
+var completedPackets = new minHeap();
+
+//Dummy data consisting of 10, 100 X 100 arrays
+var partitionedData = createMatrixArrays(100, 10);
+
+//Insert the data into the unsentPackets heap
+var counter = 0;
+partitionedData.forEach(function(element){
+  var packet = {'id': counter++, 'chunk': element};
+  unsentPackets.insert(packet);
+});
+
+//timer flag
 var flag = true;
+
 io.of('/').on('connection', function(socket){
+  //This kicks off our timer for internal testing purposes
   if(flag){
 		console.time('timer');
 		flag = false;
@@ -61,31 +76,35 @@ io.of('/').on('connection', function(socket){
 	console.log('new connection');
 	availableClients.push(socket);
 
+  //Notify everyone a new client has been added
   io.emit('clientChange', { 
     availableClients : availableClients.length 
   });
 
   socket.on('ready', function() {
     console.log('Client Ready');
-    if (i < partitionedData.length) {
+    if (unsentPackets.size() > 0) {
       socket.emit('data', {
-        chunk : partitionedData[i++]
+        unsentPackets.getMin()
      });
     }
   });
 
 	socket.on('completed', function(data){
-    completedData.push(data);
+    completedPackets.insert(data);
+
+    //Update everyone on the current progress
     io.emit('progress', { 
-      progress : completedData.length / partitionedData.length
+      progress : completedPackets.size() / partitionedData.length
     });
-		if (completedData.length === partitionedData.length ){
-      console.log("COMPUTATION COMPLETE")
+
+		if (completedPackets.size() === partitionedData.length ){
+      console.log("COMPUTATION COMPLETE");
 			console.timeEnd('timer');
       io.emit('complete');
 		} else {
       socket.emit('data',{
-        chunk: partitionedData[i++]
+        unsentPackets.getMin()
       });
     }
 	});
