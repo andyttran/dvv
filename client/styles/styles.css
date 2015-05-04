@@ -1,0 +1,32 @@
+
+html,body {
+  margin:0px;
+  height:100%;
+  padding:0px;
+  overflow:hidden;
+}
+
+body {
+  background: -webkit-linear-gradient(180deg, #6441A5 10%, #2a0845 90%); /* Chrome 10+, Saf5.1+ */
+  background:    -moz-linear-gradient(180deg, #6441A5 10%, #2a0845 90%); /* FF3.6+ */
+  background:     -ms-linear-gradient(180deg, #6441A5 10%, #2a0845 90%); /* IE10 */
+  background:      -o-linear-gradient(180deg, #6441A5 10%, #2a0845 90%); /* Opera 11.10+ */
+  background:         linear-gradient(180deg, #6441A5 10%, #2a0845 90%); /* W3C */      
+  background-repeat:no-repeat;
+  background-size:cover;
+}
+
+h1 {
+  color:#FFF;
+  width:100px;
+  text-align:center;
+  margin:0px auto;
+}
+
+.rdy {
+  width:100px;
+  margin:0px auto;
+  display:inherit;
+}
+
+
