@@ -36,6 +36,10 @@ var clientRdy = function(){
   socket.emit('ready');
 }
 
+socket.on('complete', function(){
+  console.log("COMPLETE");
+});
+
 
 
 

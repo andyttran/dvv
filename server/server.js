@@ -48,13 +48,11 @@ var createMatrixArrays = function(matrixSize, arrayLength){
 };
 
 var availableClients = [];
-var partitionedData = createMatrixArrays(100, 10);
-//var partitionedData = [1,2,3];
+var partitionedData = createMatrixArrays(200, 10);
 var i = 0;
 var completedData = [];
 var flag = true;
 io.of('/').on('connection', function(socket){
-	socket.join('slave');
   if(flag){
 		console.time('timer');
 		flag = false;
@@ -62,6 +60,7 @@ io.of('/').on('connection', function(socket){
 
 	console.log('new connection');
 	availableClients.push(socket);
+
   io.emit('clientChange', { 
     availableClients : availableClients.length 
   });
@@ -83,6 +82,7 @@ io.of('/').on('connection', function(socket){
 		if (completedData.length === partitionedData.length ){
       console.log("COMPUTATION COMPLETE")
 			console.timeEnd('timer');
+      io.emit('complete');
 		} else {
       socket.emit('data',{
         chunk: partitionedData[i++]
@@ -92,7 +92,7 @@ io.of('/').on('connection', function(socket){
 
 	socket.on('disconnect', function(){
 		availableClients.splice(availableClients.indexOf(socket), 1);
-    socket.broadcast.to('slave').emit('clientChange', { 
+    socket.broadcast.emit('clientChange', { 
       availableClients : availableClients.length 
     });
 	});
