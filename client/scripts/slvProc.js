@@ -1,25 +1,28 @@
 
 var connectedClients = 0;
 var socket = io.connect();
+var func = 'element';
 
-var asyncprocess = function(data, cb){
-  cb(data, function(result){
-    socket.emit('completed', {
-      "result":result
-    });
-  });
-};
-
-// var doubler = function(data, cb) {
-//   cb(data * 2);
-// };
+//Upon button press, this function notifies the master
+//it is ready to start
+var clientRdy = function(){
+  socket.emit('ready');
+}
 
 socket.on('data', function(data) {
-  console.log("data");
-  var result = math.inv(data.chunk);
+  console.log("data received");
+
+  //TODO: WEB WORKER
+  //Save function if a function was passed in
+  if (data.fn){
+    func = data.fn;
+  }
+  var element = data.payload;
+  var result = eval(func);
   console.log ("results done");
   socket.emit('completed', {
-  	"result": result
+    "id": data.id,
+    "result": result
   });
 });
 
@@ -32,9 +35,6 @@ socket.on('clientChange', function(data) {
   console.log("Clients: ",connectedClients)
 });
 
-var clientRdy = function(){
-  socket.emit('ready');
-}
 
 socket.on('complete', function(){
   console.log("COMPLETE");

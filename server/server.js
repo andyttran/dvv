@@ -54,18 +54,21 @@ var pendingPackets = {};
 var completedPackets = new minHeap();
 
 //Dummy data consisting of 10, 100 X 100 arrays
-// var partitionedData = createMatrixArrays(100, 10);
-var partitionedData = [1,2,3];
+var partitionedData = createMatrixArrays(10, 10);
+// var partitionedData = [1,2,3];
 
 //Insert the data into the unsentPackets heap
 var counter = 0;
 partitionedData.forEach(function(element){
-  var packet = {'id': counter++, 'chunk': element};
+  var packet = {'id': counter++, 'payload': element};
   unsentPackets.insert(packet);
 });
 
 //timer flag
 var flag = true;
+
+//We define the function as a string
+var func = 'math.inv(element)';
 
 io.of('/').on('connection', function(socket){
   //This kicks off our timer for internal testing purposes
@@ -85,8 +88,11 @@ io.of('/').on('connection', function(socket){
   socket.on('ready', function() {
     console.log('Client Ready');
     if (unsentPackets.size() > 0) {
+      var nextPacket = unsentPackets.getMin();
       socket.emit('data', {
-        chunk: unsentPackets.getMin()
+        fn: func,
+        id: nextPacket.id,
+        payload: nextPacket.payload
      });
     }
   });
@@ -108,13 +114,16 @@ io.of('/').on('connection', function(socket){
         finishedResults.push(completedPackets.getMin().result);
       }
       console.log(finishedResults);
+
       /************************
       FURTHER CALCULATIONS MAY BE DONE HERE
       */
       io.emit('complete');
 		} else {
+      var nextPacket = unsentPackets.getMin();
       socket.emit('data',{
-        chunk: unsentPackets.getMin()
+        id: nextPacket.id,
+        payload: nextPacket.payload
       });
     }
 	});
