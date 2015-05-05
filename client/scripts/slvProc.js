@@ -1,26 +1,41 @@
 
 var connectedClients = 0;
 var socket = io.connect();
+//Predefined function just returns the element
+var func = 'element';
 
-var asyncprocess = function(data, cb){
-  cb(data, function(result){
-    socket.emit('completed', {
-      "result":result
-    });
-  });
-};
+//Upon button press, this function notifies the master
+//it is ready to start
+var clientRdy = function(){
+  socket.emit('ready');
+}
 
-// var doubler = function(data, cb) {
-//   cb(data * 2);
-// };
 
 socket.on('data', function(data) {
-  console.log("data");
-  var result = math.inv(data.chunk);
-  console.log ("results done");
-  socket.emit('completed', {
-  	"result": result
-  });
+  console.log("data received");
+
+  //Save function if a function was passed in
+  if (data.fn){
+    func = data.fn;
+  }
+  
+  //Spawn a new webworker
+  var worker = new Worker('scripts/workerTask.js');
+
+  //Have our slave process listen to when web worker finishes computation
+  worker.addEventListener('message', function(e) {
+    console.log ("Worker has finished computing");
+    //TODO: error handling?
+    socket.emit('completed', {
+      "id": data.id,
+      "result": e.data
+    });
+    worker.terminate();
+  }, false);
+
+  //Send data to our worker
+  worker.postMessage({fn: func, payload: data.payload});
+
 });
 
 socket.on('progress', function(data) {
@@ -32,14 +47,6 @@ socket.on('clientChange', function(data) {
   console.log("Clients: ",connectedClients)
 });
 
-var clientRdy = function(){
-  socket.emit('ready');
-}
-
 socket.on('complete', function(){
   console.log("COMPLETE");
 });
-
-
-
-
