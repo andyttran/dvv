@@ -26,6 +26,13 @@ app.get('/', function(req, res){
 	res.render('index');
 });
 
+//Initialize all data structures we'll need
+var availableClients = [];
+var unsentPackets = new minHeap();
+var pendingPackets = {};
+var completedPackets = new minHeap();
+
+//TODO: potentially get rid of this
 //Function to create arrays for testing purposes
 var createMatrixArrays = function(matrixSize, arrayLength){
   var randomArray = function(n){
@@ -47,26 +54,32 @@ var createMatrixArrays = function(matrixSize, arrayLength){
   return result;
 };
 
-//Initialize all data structures we'll need
-var availableClients = [];
-var unsentPackets = new minHeap();
-var pendingPackets = {};
-var completedPackets = new minHeap();
+//TODO: have this interval change based on partition function parameters
+//Timer interval for fault tolerance, can be adjusted or made non constant
+var TIMEOUT_INTERVAL = 5000;
 
+//TODO: make this into a modular partition function
 //Dummy data consisting of 10, 100 X 100 arrays
-var partitionedData = createMatrixArrays(10, 10);
+var partitionedData = createMatrixArrays(100, 10);
 // var partitionedData = [1,2,3];
 
-//Insert the data into the unsentPackets heap
-var counter = 0;
-partitionedData.forEach(function(element){
-  var packet = {'id': counter++, 'payload': element};
-  unsentPackets.insert(packet);
-});
+//TODO: will be moved to utilities functions
+//Insert the partitioned data into the unsentPackets heap
+var initializeProcess = function(partitionedData){
+  var counter = 0;
+  partitionedData.forEach(function(element){
+    var packet = {'id': counter++, 'payload': element};
+    unsentPackets.insert(packet);
+  });
+}
+
+//Insert partitioned data into the unsent heap
+initializeProcess(partitionedData);
 
 //timer flag
 var flag = true;
 
+//TODO: let users define the function somehow, API like?
 //We define the function as a string
 var func = 'math.inv(element)';
 // var func = 'element * 2';
@@ -86,21 +99,32 @@ io.of('/').on('connection', function(socket){
     availableClients : availableClients.length 
   });
 
+  //When client is ready, send them a packet
   socket.on('ready', function() {
     console.log('Client Ready');
     sendNextAvailablePacket(socket);
   });
 
+  //When client has returned data, check validity and send 
+  //another packet if necessary
 	socket.on('completed', function(data){
-    console.log(data);
-    completedPackets.insert(data);
+    // console.log(data);
 
-    //Update everyone on the current progress
-    //TODO: perhaps modify to do it only every once in a while
-    //to avoid congestion
-    io.emit('progress', { 
-      progress : completedPackets.size() / partitionedData.length
-    });
+    //If the computation was completed successfully 
+    //and it was delivered back in a timely fashion,
+    //add it to the completed packets heap/ remove from pending packets
+    //**NOTE: this implies late packages will be chucked aside
+    if (data.id !== -1 && pendingPackets[data.id]){
+      delete pendingPackets[data.id];
+      completedPackets.insert(data);
+      
+      //Update everyone on the current progress
+      //TODO: perhaps modify to do it only every once in a while
+      //to avoid congestion
+      io.emit('progress', { 
+        progress : completedPackets.size() / partitionedData.length
+      });
+    }
 
 		if (completedPackets.size() === partitionedData.length ){
       console.log("COMPUTATION COMPLETE");
@@ -110,12 +134,21 @@ io.of('/').on('connection', function(socket){
       while(completedPackets.size() > 0){
         finishedResults.push(completedPackets.getMin().result);
       }
-      console.log(finishedResults);
+      // console.log(finishedResults);
 
       /************************
-      FURTHER CALCULATIONS MAY BE DONE HERE
+      TODO: FURTHER CALCULATIONS MAY BE DONE HERE
       YOU CAN ALSO RESET THE PROCESS AND CHOOSE NOT
       TO EMIT COMPLETE HERE AS WELL
+      Example implementation:
+
+      partitionedData = partitionData(finishedResults);
+      resetProcess();
+      initializeProcess(partitionedData);
+      availableClients.forEach(function(socket){
+        sendNextAvailablePacket(socket);
+      });
+
       */
       io.emit('complete');
 		} else {
@@ -134,7 +167,17 @@ io.of('/').on('connection', function(socket){
 });
 
 
-//Utility function TODO: can be moved out if you wish
+//Utility functions TODO: can be all moved out if you wish
+
+//Reset all data structures
+var resetProcess = function(){
+  availableClients = [];
+  unsentPackets = new minHeap();
+  pendingPackets = {};
+  completedPackets = new minHeap();
+}
+
+//Send the next available packet
 var sendNextAvailablePacket = function(socket){
   if (unsentPackets.size() > 0) {
     var nextPacket = unsentPackets.getMin();
@@ -143,5 +186,20 @@ var sendNextAvailablePacket = function(socket){
       id: nextPacket.id,
       payload: nextPacket.payload
    });
+    pendingPackets[nextPacket.id] = nextPacket.payload;
+    createTimer(nextPacket.id);
   }
 };
+
+//This creates a timer of 5 seconds that will check whether the package
+//is still pending. If it is, it will add it back to the unsent heap
+var createTimer = function(packetNumber){
+  setTimeout(function(){
+    if (pendingPackets[packetNumber]){
+      console.log('packet number ' + packetNumber + ' is late!');
+      var packet = {'id': packetNumber, 'payload': pendingPackets[packetNumber]};
+      delete pendingPackets[packetNumber];
+      unsentPackets.insert(packet);
+    }
+  }, TIMEOUT_INTERVAL, packetNumber);
+}
