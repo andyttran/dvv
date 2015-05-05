@@ -74,7 +74,7 @@ var func = 'math.inv(element)';
 io.of('/').on('connection', function(socket){
   //This kicks off our timer for internal testing purposes
   if(flag){
-		console.time('timer');
+		console.time('Timer');
 		flag = false;
 	}
 
@@ -104,7 +104,7 @@ io.of('/').on('connection', function(socket){
 
 		if (completedPackets.size() === partitionedData.length ){
       console.log("COMPUTATION COMPLETE");
-			console.timeEnd('timer');
+			console.timeEnd('Timer');
       var finishedResults = [];
       //Integration of all the resulting data using heapsort
       while(completedPackets.size() > 0){
