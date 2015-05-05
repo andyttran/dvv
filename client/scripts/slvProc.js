@@ -10,21 +10,32 @@ var clientRdy = function(){
   socket.emit('ready');
 }
 
+
 socket.on('data', function(data) {
   console.log("data received");
 
-  //TODO: WEB WORKER
   //Save function if a function was passed in
   if (data.fn){
     func = data.fn;
   }
-  var element = data.payload;
-  var result = eval(func);
-  console.log ("results done");
-  socket.emit('completed', {
-    "id": data.id,
-    "result": result
-  });
+  
+  //Spawn a new webworker
+  var worker = new Worker('scripts/workerTask.js');
+
+  //Have our slave process listen to when web worker finishes computation
+  worker.addEventListener('message', function(e) {
+    console.log ("Worker has finished computing");
+    //TODO: error handling?
+    socket.emit('completed', {
+      "id": data.id,
+      "result": e.data
+    });
+    worker.terminate();
+  }, false);
+
+  //Send data to our worker
+  worker.postMessage({fn: func, payload: data.payload});
+
 });
 
 socket.on('progress', function(data) {

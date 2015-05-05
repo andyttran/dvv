@@ -69,6 +69,7 @@ var flag = true;
 
 //We define the function as a string
 var func = 'math.inv(element)';
+// var func = 'element * 2';
 
 io.of('/').on('connection', function(socket){
   //This kicks off our timer for internal testing purposes
