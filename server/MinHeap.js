@@ -75,12 +75,12 @@ MinHeap.prototype.sinkDown = function(n){
       // Do the same checks for the other child.
       if (child2N < length) {
         var child2 = this.storage[child2N];
-        if (child2.id < (swap == null ? element.id : child1.id))
+        if (child2.id < (swap === null ? element.id : child1.id))
           swap = child2N;
       }
 
       // No need to swap further, we are done.
-      if (swap == null) break;
+      if (swap === null) break;
 
       // Otherwise, swap and continue.
       this.storage[n] = this.storage[swap];
