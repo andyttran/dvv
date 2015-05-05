@@ -20,10 +20,13 @@ function findNQueensParallel(n) {
   //Initiate output object
   var dvv = {};
 
+  //Create chucks to distribute to slaves
   dvv.partition = createChunks(n, rows);
 
+  //Minified version of nQueens function below
   dvv.func = function Q(r,i){var n=0;if(void 0===r)return n;var a=function(r,f,t,v){v===i&&n++;for(var o=0;i>o;o++)if(!r[o]){var u=o-v,c=o+v;f[u]||t[c]||(f[u]=!0,t[c]=!0,r[o]=!0,v++,a(r,f,t,v),f[u]=!1,t[c]=!1,r[o]=!1,v--)}};return a.apply(this,r),n};
 
+  //Callback function sums up all solutions found
   dvv.callback = function(results){
     return results.reduce(function(sum, resultChunk){
       return sum + resultChunk;
@@ -36,7 +39,7 @@ function findNQueensParallel(n) {
 
 //Un-minified version of dvvNQ.func for demonstration purposes
   //slave will run this for the chunk data provided
-function Q(initialize, n){
+function nQueens(initialize, n){
   
   var solution = 0;
   
@@ -45,7 +48,7 @@ function Q(initialize, n){
     return solution;
   }
 
-  //This Nqueens solution uses objects for constant time lookup
+  //This nQueens solution uses objects for constant time lookup
     //key is an object that stores the columns that have a queen
     //majorKey is an object that stores the majorKey of added queens
     //minorKey is an object that stores the minorKey of added queens
