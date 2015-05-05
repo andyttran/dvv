@@ -87,14 +87,7 @@ io.of('/').on('connection', function(socket){
 
   socket.on('ready', function() {
     console.log('Client Ready');
-    if (unsentPackets.size() > 0) {
-      var nextPacket = unsentPackets.getMin();
-      socket.emit('data', {
-        fn: func,
-        id: nextPacket.id,
-        payload: nextPacket.payload
-     });
-    }
+    sendNextAvailablePacket(socket);
   });
 
 	socket.on('completed', function(data){
@@ -102,6 +95,8 @@ io.of('/').on('connection', function(socket){
     completedPackets.insert(data);
 
     //Update everyone on the current progress
+    //TODO: perhaps modify to do it only every once in a while
+    //to avoid congestion
     io.emit('progress', { 
       progress : completedPackets.size() / partitionedData.length
     });
@@ -110,6 +105,7 @@ io.of('/').on('connection', function(socket){
       console.log("COMPUTATION COMPLETE");
 			console.timeEnd('timer');
       var finishedResults = [];
+      //Integration of all the resulting data using heapsort
       while(completedPackets.size() > 0){
         finishedResults.push(completedPackets.getMin().result);
       }
@@ -117,21 +113,34 @@ io.of('/').on('connection', function(socket){
 
       /************************
       FURTHER CALCULATIONS MAY BE DONE HERE
+      YOU CAN ALSO RESET THE PROCESS AND CHOOSE NOT
+      TO EMIT COMPLETE HERE AS WELL
       */
       io.emit('complete');
 		} else {
-      var nextPacket = unsentPackets.getMin();
-      socket.emit('data',{
-        id: nextPacket.id,
-        payload: nextPacket.payload
-      });
+      sendNextAvailablePacket(socket);
     }
 	});
 
 	socket.on('disconnect', function(){
+    //Remove socket from the list of available clients
 		availableClients.splice(availableClients.indexOf(socket), 1);
+    //Notify everyone that someone left
     socket.broadcast.emit('clientChange', { 
       availableClients : availableClients.length 
     });
 	});
 });
+
+
+//Utility function TODO: can be moved out if you wish
+var sendNextAvailablePacket = function(socket){
+  if (unsentPackets.size() > 0) {
+    var nextPacket = unsentPackets.getMin();
+    socket.emit('data', {
+      fn: func,
+      id: nextPacket.id,
+      payload: nextPacket.payload
+   });
+  }
+};

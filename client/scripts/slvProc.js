@@ -1,6 +1,7 @@
 
 var connectedClients = 0;
 var socket = io.connect();
+//Predefined function just returns the element
 var func = 'element';
 
 //Upon button press, this function notifies the master
@@ -35,11 +36,6 @@ socket.on('clientChange', function(data) {
   console.log("Clients: ",connectedClients)
 });
 
-
 socket.on('complete', function(){
   console.log("COMPLETE");
 });
-
-
-
-
