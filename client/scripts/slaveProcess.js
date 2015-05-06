@@ -58,9 +58,12 @@ socket.on('progress', function(data) {
 socket.on('clientChange', function(data) {
   connectedClients = data.availableClients;
   updateConnected(connectedClients);
-
+  console.log("Clients: ",connectedClients);
+  //updateConnected(connectedClients);
 });
 
 socket.on('complete', function(){
+  var btn = document.getElementById("rdy");
+  btn.value = "Complete";
   console.log("COMPLETE");
 });

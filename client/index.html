@@ -11,15 +11,21 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/1.6.0/math.min.js"></script>
 </head>
 <body>
+
   <script src="scripts/slaveProcess.js"></script>
 
   <div class = "container">
 
+  <div class = "wrapper">
+  <div class ="upperLeft">  
+
   <h1>dvv</h1>
-  <input value="Begin" class="btn btn-default rdy" onclick ="this.disabled = true;clientRdy(this)"></input>
+  <input id="rdy" value="Begin" class="btn btn-default" onclick ="this.disabled = true;clientRdy(this)"></input>
   <div class ="connectedCounter">Connected: <span></span></div>
-  <div class ="visualization"></div>
+</div>
+
 </div>
   <script src="scripts/visualization.js"></script>
+
 </body>
 </html>
