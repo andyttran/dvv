@@ -157,6 +157,7 @@ io.of('/').on('connection', function(socket){
 	});
 
 	socket.on('disconnect', function(){
+    console.log("dc");
     //Remove socket from the list of available clients
 		availableClients.splice(availableClients.indexOf(socket), 1);
     //Notify everyone that someone left
