@@ -10,7 +10,7 @@ var clientRdy = function(){
   socket.emit('ready');
 }
 
-
+//Upon receiving data, process it
 socket.on('data', function(data) {
   console.log("data received");
 
@@ -25,10 +25,22 @@ socket.on('data', function(data) {
   //Have our slave process listen to when web worker finishes computation
   worker.addEventListener('message', function(e) {
     console.log ("Worker has finished computing");
-    //TODO: error handling?
+    //Send the results if successful
     socket.emit('completed', {
       "id": data.id,
       "result": e.data
+    });
+    //Kill the worker
+    worker.terminate();
+  }, false);
+
+  //Have our slave process listen to errors from web worker
+  worker.addEventListener('error', function(e){
+    console.log("Worker has encountered an error with computation");
+    //Send an error message back to master process
+    socket.emit('completed', {
+      "id": -1,
+      "result": null
     });
     worker.terminate();
   }, false);
