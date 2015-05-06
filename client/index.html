@@ -11,8 +11,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/1.6.0/math.min.js"></script>
 </head>
 <body>
+  <div class = "container">
   <h1>dvv</h1>
-  <button class="btn btn-default rdy" onclick ="clientRdy()">READY!</button>
+  <input value="Begin" class="btn btn-default rdy" onclick ="this.disabled = true;clientRdy(this)"></input>
+  <div class ="connectedCounter">Connected: <span></span></div>
+  <div class ="visualization"></div>
+</div>
   <script src="scripts/slvProc.js"></script>
+  <script src="scripts/visualization.js"></script>
 </body>
 </html>

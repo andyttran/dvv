@@ -6,7 +6,8 @@ var func = 'element';
 
 //Upon button press, this function notifies the master
 //it is ready to start
-var clientRdy = function(){
+var clientRdy = function(btn){
+  btn.value = "Computing";
   socket.emit('ready');
 }
 
@@ -56,7 +57,8 @@ socket.on('progress', function(data) {
 
 socket.on('clientChange', function(data) {
   connectedClients = data.availableClients;
-  console.log("Clients: ",connectedClients)
+  console.log("Clients: ",connectedClients);
+  updateConnected(connectedClients);
 });
 
 socket.on('complete', function(){
