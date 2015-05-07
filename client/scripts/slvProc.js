@@ -9,6 +9,7 @@ var func = 'element';
 var clientRdy = function(btn){
   btn.value = "Computing";
   socket.emit('ready');
+  startAnim();
 }
 
 //Upon receiving data, process it
@@ -52,7 +53,9 @@ socket.on('data', function(data) {
 });
 
 socket.on('progress', function(data) {
+  startAnim();
   console.log(data.progress);
+  updateProgress(data.progress);
 });
 
 socket.on('clientChange', function(data) {
@@ -65,4 +68,5 @@ socket.on('complete', function(){
   var btn = document.getElementById("rdy");
   btn.value = "Complete";
   console.log("COMPLETE");
+  stopAnim();
 });
