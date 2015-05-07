@@ -1,5 +1,5 @@
 //An distributed computing version of nqueens solver
-function findNQueensParallel(n) {
+var nQueensParallel = function(n) {
   
   //Estimate total time in milliseconds based on trial runs
   var est = 4.9*Math.pow(10, -6)*Math.pow(2.71, 1.6*n);
@@ -17,29 +17,29 @@ function findNQueensParallel(n) {
     est > lowerThreshold && rows++;
   }
 
-  //Initiate output object
-  var dvv = {};
+  var obj = {};
 
   //Create chucks to distribute to slaves
-  dvv.partition = createChunks(n, rows);
+  obj.partition = createPartition(n, rows);
 
-  //Minified version of nQueens function below
-  dvv.func = function Q(r,i){var n=0;if(void 0===r)return n;var a=function(r,f,t,v){v===i&&n++;for(var o=0;i>o;o++)if(!r[o]){var u=o-v,c=o+v;f[u]||t[c]||(f[u]=!0,t[c]=!0,r[o]=!0,v++,a(r,f,t,v),f[u]=!1,t[c]=!1,r[o]=!1,v--)}};return a.apply(this,r),n};
+  //Minified version of nQueensSolver function below
+  obj.func = function Q(r,i){var n=0;if(void 0===r)return n;var a=function(r,f,t,v){v===i&&n++;for(var o=0;i>o;o++)if(!r[o]){var u=o-v,c=o+v;f[u]||t[c]||(f[u]=!0,t[c]=!0,r[o]=!0,v++,a(r,f,t,v),f[u]=!1,t[c]=!1,r[o]=!1,v--)}};return a.apply(this,r),n};
 
   //Callback function sums up all solutions found
-  dvv.callback = function(results){
-    return results.reduce(function(sum, resultChunk){
+  obj.callback = function(results){
+    var solutions = results.reduce(function(sum, resultChunk){
       return sum + resultChunk;
     }, 0);
+    console.log(solutions);
   };
 
-  return dvv;
+  return obj;
 };
 
 
-//Un-minified version of dvvNQ.func for demonstration purposes
+//Un-minified version of dvvNQ.func for reference purposes
   //slave will run this for the chunk data provided
-function nQueens(initialize, n){
+function nQueensSolver(initialize, n){
   
   var solution = 0;
   
@@ -98,7 +98,7 @@ function nQueens(initialize, n){
 //This is used to get the partitioned chunks
   //if estimated computation time is less than threshold, does not partition and send out the default case starting case
   //e.g., dvv.partition[0] = [[{},{},{},0], n]
-function createChunks(n, rows){
+function createPartition(n, rows){
   var results = [];
 
   //Resursively iterate to find a valid a chunk
@@ -141,3 +141,5 @@ function createChunks(n, rows){
   findValidChunk({},{},{},0);
   return results;
 }
+
+module.exports = nQueensParallel;

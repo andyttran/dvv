@@ -1,41 +1,86 @@
+var express = require('express');
+var http = require('http');
+var favicon = require('serve-favicon');
 
-var dvv = function(){
+//Initiate server variables in global scope
+var server;
+var io;
 
-  var express = require('express');
-  var http = require('http');
-  var favicon = require('serve-favicon');
-  
-  //TODO: include MinHeap.js in same file
-  var minHeap = require('./MinHeap.js');
+//Global variables
+//Path to static files
+var STATIC_PATH = '/';
 
-  //Global variables
-  var STATIC_PATH = '/';
-  //var FAVICON_PATH = '/favicon.ico';
-  var DEFAULT_PORT = 8000;
-  //TODO: have this interval change based on partition function parameters
-  //Timer interval for fault tolerance, can be adjusted or made non constant
-  var TIMEOUT_INTERVAL = 5000;
+////Path to favicon icon
+//var FAVICON_PATH = '/favicon.ico';
 
-  //Default sample parallel process
-  var FUNC= 'function(value){ return value; }';
-  var PARTITION = [1, 2, 3];
-  var CALLBACK = function(results){
-    console.log(results);
-  };
-  var CLOCK = false;
+//Timer interval for fault tolerance
+var TIMEOUT_INTERVAL = 5000;
 
-}
+//Default distributed computing process
+//Function for clients to compute
+//Must be in form of a string with element as the an input parameter for the partition data
+var FUNC = '(function(val){return val;}).apply(this, element)';
 
-dvv.prototype.init = function(){
+//Array of partition data
+var PARTITION = [1, 2, 3];
+
+//Length of each partition
+//Default set to 1
+//For function requiring more than one input parameter, define each set of arguments in an 
+//array and set PARTITION_LENGTH = 0
+var PARTITION_LENGTH = 1;
+
+//Callback to be made on complete of entire distributed task
+var CALLBACK = function(results){ console.log(results); };
+
+//Set a timer to measure the duration of entire distributed task
+//For testing purposes
+var CLOCK = false;
+
+
+var dvv = {};
+
+dvv.config = function(params){
+  //TODO: test for correct input params before setting
+  if('staticPath' in params){
+    STATIC_PATH = params.staticPath;
+  }
+  //params.hasOwnProperty(faviconPath) &&  FAVICON_PATH = params.faviconPath;
+  if('timeout' in params){
+    TIMEOUT_INTERVAL = params.timeout;
+  }
+
+  //TODO: set the function parameters in case they input a native function i.e., 'map'
+  if('func' in params){
+    FUNC = '(' + params.func + ').apply(this, element)';
+  }
+
+  if('partition' in params){
+    PARTITION = params.partition;
+  }
+
+  if('partitionLength' in params){
+    PARTITION_LENGTH = params.partitionLength;
+  }
+
+  if('callback' in params){
+    CALLBACK = params.callback;
+  }
+  if('clock' in params){
+    CLOCK = params.clock;
+  }
+};
+
+dvv.start = function(){
   //Create server
   var app = express();
-  var server = http.createServer(app);
+  server = http.createServer(app);
 
   //Create the socket.io instance attached to the express instance
-  var io = require('socket.io')(server);
-  var port = process.env.PORT || DEFAULT_PORT;
+  io = require('socket.io')(server);
+  var port = process.env.PORT || 8000;
   
-  // Start the server
+  //Start the server
   server.listen(port, function() {
     console.log('Server listening on port ' + port);
   });
@@ -46,49 +91,38 @@ dvv.prototype.init = function(){
   //TODO: tell express where to find the favicon
   //app.use(favicon(__dirname + STATIC_PATH));
 
-  //define routes
+  //Define routes
   app.get('/', function(req, res){
-  res.render('index');
+    res.render('index');
   });
-};
-
-
-dvv.prototype.config = function(params){
-
-  //TODO: test for correct input params before setting
-  params.hasOwnProperty(staticPath) &&  STATIC_PATH = params.staticPath;
-  //params.hasOwnProperty(faviconPath) &&  FAVICON_PATH = params.faviconPath;
-  params.hasOwnProperty(port) &&  DEFAULT_PORT = params.port;
-  params.hasOwnProperty(timeout) &&  TIMEOUT_INTERVAL = params.timeout;
-
-  //TODO: set the function parameters in case they input a native function i.e., 'map'
-  params.hasOwnProperty(func) && FUNC = params.func;
-  params.hasOwnProperty(parition) && PARTITION = params.partition;
-  params.hasOwnProperty(callback) && CALLBACK = params.callback;
-  params.hasOwnProperty(clock) && CLOCK = params.clock;
-
-};
-
-dvv.prototype.connect = function(){
 
   //Initialize all required data structures
   var availableClients = [];
-  var unsentPackets = new minHeap();
+  var unsentPackets = new MinHeap();
   var pendingPackets = {};
-  var completedPackets = new minHeap();
+  var completedPackets = new MinHeap();
 
-  //Copy operation data from dvv object
-  var partitionedData = this.partition;
-  var func = this.func;
-  var callback = this.callback;
-  var clock = this.clock;
+  //Copy global variables
+  var func = FUNC;
+  var callback = CALLBACK;
+  var clock = CLOCK;
+
+  //Partition the data into increments based on PARTITION_LENGTH
+  var partitionedData = [];
+  if(PARTITION_LENGTH === 0){
+    partitionedData = PARTITION;
+  } else if (PARTITION_LENGTH > 0){
+    for(var i = 0; i < PARTITION.length; i += PARTITION_LENGTH){
+      partitionedData.push(PARTITION.slice(i, Math.min(i + PARTITION_LENGTH, PARTITION.length)));
+    }
+  }
 
   //Insert partitioned data into the unsent heap
   initializeProcess(partitionedData);
   
   io.of('/').on('connection', function(socket){
     //This kicks off timer for internal testing purposes
-    if(timer){
+    if(clock){
       console.time('timer');
     }
 
@@ -129,7 +163,7 @@ dvv.prototype.connect = function(){
       if (completedPackets.size() === partitionedData.length){
         console.log("Computation Complete");
 
-        if(timer){
+        if(clock){
           console.timeEnd('timer');
         }
         var finishedResults = [];
@@ -166,51 +200,144 @@ dvv.prototype.connect = function(){
       });
     });
   });
-}
 
-//Utility functions
-//Insert the partitioned data into the unsentPackets heap
-var initializeProcess = function(partitionedData){
-  var counter = 0;
-  partitionedData.forEach(function(element){
-    var packet = {'id': counter++, 'payload': element};
-    unsentPackets.insert(packet);
-  });
-}
-
-//Reset all data structures
-var resetProcess = function(){
-  availableClients = [];
-  unsentPackets = new minHeap();
-  pendingPackets = {};
-  completedPackets = new minHeap();
-}
-
-//Send the next available packet
-var sendNextAvailablePacket = function(socket){
-  if (unsentPackets.size() > 0) {
-    var nextPacket = unsentPackets.getMin();
-    socket.emit('data', {
-      fn: func,
-      id: nextPacket.id,
-      payload: nextPacket.payload
-   });
-    pendingPackets[nextPacket.id] = nextPacket.payload;
-    createTimer(nextPacket.id);
+  //Utility functions
+  //Insert the partitioned data into the unsentPackets heap
+  function initializeProcess(partitionedData){
+    var counter = 0;
+    partitionedData.forEach(function(element){
+      var packet = {'id': counter++, 'payload': element};
+      unsentPackets.insert(packet);
+    });
   }
+
+  //Reset all data structures
+  function resetProcess(){
+    availableClients = [];
+    unsentPackets = new MinHeap();
+    pendingPackets = {};
+    completedPackets = new MinHeap();
+  }
+
+  //Send the next available packet
+  function sendNextAvailablePacket(socket){
+    if (unsentPackets.size() > 0) {
+      var nextPacket = unsentPackets.getMin();
+      socket.emit('data', {
+        fn: func,
+        id: nextPacket.id,
+        payload: nextPacket.payload
+     });
+      pendingPackets[nextPacket.id] = nextPacket.payload;
+      createTimer(nextPacket.id);
+    }
+  };
+
+  //This creates a timer of that will check whether the package
+  //is still pending. If it is, it will add it back to the unsent heap
+  function createTimer(packetNumber){
+    setTimeout(function(){
+      if (pendingPackets[packetNumber]){
+        console.log('packet number ' + packetNumber + ' is late!');
+        var packet = {'id': packetNumber, 'payload': pendingPackets[packetNumber]};
+        delete pendingPackets[packetNumber];
+        unsentPackets.insert(packet);
+      }
+    }, TIMEOUT_INTERVAL, packetNumber);
+  }
+}
+
+//**************************************************************
+//Define minimum heap for storing partition data
+var MinHeap = function(){
+  this.storage = [];
+  this.storage.push(null);
 };
 
-//This creates a timer of that will check whether the package
-//is still pending. If it is, it will add it back to the unsent heap
-var createTimer = function(packetNumber){
-  setTimeout(function(){
-    if (pendingPackets[packetNumber]){
-      console.log('packet number ' + packetNumber + ' is late!');
-      var packet = {'id': packetNumber, 'payload': pendingPackets[packetNumber]};
-      delete pendingPackets[packetNumber];
-      unsentPackets.insert(packet);
+MinHeap.prototype.size = function(){
+  //Taking into account the null element we pushed
+  return this.storage.length - 1;
+};
+
+MinHeap.prototype.isEmpty = function(){
+  return this.size() === 0;
+};
+
+MinHeap.prototype.insert = function(value){
+  this.storage.push(value);
+  this.bubbleUp(this.storage.length - 1);
+};
+
+MinHeap.prototype.getMin = function(){
+  // Store the first element so we can return it later.
+    var min = this.storage[1];
+    // Get the element at the end of the array.
+    var end = this.storage.pop();
+    // If there are any elements left, put the end element at the
+    // start, and let it sink down.
+    if (this.storage.length > 1) {
+      this.storage[1] = end;
+      this.sinkDown(1);
     }
-  }, TIMEOUT_INTERVAL, packetNumber);
-}
+    return min;
+};
+
+MinHeap.prototype.bubbleUp = function(n){
+   // Fetch the element that has to be moved.
+    var element = this.storage[n];
+    // When at 0, an element can not go up any further.
+    while (n > 1) {
+      // Compute the parent element's index, and fetch it.
+      var parentN = Math.floor(n/2);
+      var parent = this.storage[parentN];
+      // If the parent has a lesser score, things are in order and we
+      // are done.
+      if (element.id >= parent.id){
+        break;
+      }
+      // Otherwise, swap the parent with the current element and
+      // continue.
+      this.storage[parentN] = element;
+      this.storage[n] = parent;
+      n = parentN;
+    }
+};
+
+MinHeap.prototype.sinkDown = function(n){
+  // Look up the target element and its score.
+    var length = this.storage.length;
+    var element = this.storage[n];
+
+    while(true) {
+      // Compute the indices of the child elements.
+      var child1N = n * 2;
+      var child2N = child1N + 1;
+      // This is used to store the new position of the element,
+      // if any.
+      var swap = null;
+      // If the first child exists (is inside the array)...
+      if (child1N < length) {
+        // Look it up and compute its score.
+        var child1 = this.storage[child1N];
+        // If the score is less than our element's, we need to swap.
+        if (child1.id < element.id)
+          swap = child1N;
+      }
+      // Do the same checks for the other child.
+      if (child2N < length) {
+        var child2 = this.storage[child2N];
+        if (child2.id < (swap === null ? element.id : child1.id))
+          swap = child2N;
+      }
+
+      // No need to swap further, we are done.
+      if (swap === null) break;
+
+      // Otherwise, swap and continue.
+      this.storage[n] = this.storage[swap];
+      this.storage[swap] = element;
+      n = swap;
+    }
+  };
 
 module.exports = dvv;
