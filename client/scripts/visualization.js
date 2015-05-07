@@ -6,30 +6,24 @@ var fill = d3.scale.category20();
 
 var force = d3.layout.force()
     .size([width, height])
-    .nodes([{}]) // initialize with a single node
+    .nodes([{}]) 
     .charge(75)
-    .gravity(.1)
+    .chargeDistance(1000)
+    .gravity(.5)
+    .friction(1)
+    .theta(0.1)
     .on("tick", tick);
 
 var svg = d3.select(".wrapper").append("svg")
     .attr("width", width)
-    .attr("height", height)
-    .on("mousemove", mousemove)
-    .on("mousedown", mousedown);
+    .attr("height", height);
 
 svg.append("rect")
     .attr("width", width)
     .attr("height", height);
 
 var nodes = force.nodes(),
-  //  links = force.links(),
-    node = svg.selectAll(".node"),
-    link = svg.selectAll(".link");
-
-var cursor = svg.append("circle")
-    .attr("r", 30)
-    .attr("transform", "translate(-100,-100)")
-    .attr("class", "cursor");
+    node = svg.selectAll(".node");
 
 restart();
 
@@ -60,11 +54,6 @@ function tick() {
 }
 
 function restart() {
-  // link = link.data(links);
-
-  // link.enter().insert("line", ".node")
-  //     .attr("class", "link");
-
   node = node.data(nodes);
 
   node.enter().insert("circle", ".cursor")
@@ -72,7 +61,26 @@ function restart() {
       .attr("r", 5)
       .call(force.drag);
 
+  node.exit().remove();
+
   force.start();
+}
+
+var updateConnected = function(n){
+  d3.select('.connectedCounter span').text(n);
+
+  if (n > nodes.length){
+    while (n !== nodes.length) {
+      nodes.push({});
+    }
+  } else if (n < nodes.length) {
+    while (n !== nodes.length) {
+      nodes.pop();
+    }
+  }
+
+
+  
 }
 
 d3.timer(restart);
