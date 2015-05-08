@@ -18,9 +18,6 @@ var nodes = force.nodes(),
 
 restart();
 
-function mousemove() {
-  cursor.attr("transform", "translate(" + d3.mouse(this) + ")");
-}
 
 function tick() {
   node.attr("cx", function(d) { return d.x; })
@@ -32,17 +29,17 @@ function restart() {
 
   node.enter().insert("circle")
     .attr("class", "node")
-    .attr("r", 10)
+    .attr("r", 5)
     .attr('fill', '#E1499A')
     .attr('fill-opacity', 1)
     .attr('stroke', '#E1499A')
     .attr('stroke-width', 10)
-    .attr('stroke-opacity', .5)
-    .call(force.drag);
-
+    .attr('stroke-opacity', .5);
+  
   node.exit().remove();
 
   force.start();
+
 }
 
 var updateConnected = function(n){
@@ -58,19 +55,22 @@ var updateConnected = function(n){
       nodes.pop();
     }
   }
+
 }
 
 var startAnim = function(){
   force.charge(100)
   .gravity(.2)
   .friction(1)
-  .linkDistance(100)
 }
 
 var stopAnim = function(){
-    force.charge(-200)
+  force.charge(0)
     .gravity(1)
-    .friction(.1)
+    .friction(0)
+
+ svg.style('background-color', 'white');
+ svg.transition().style('background-color', 'black').delay(1).duration(500);
 }
 
 d3.timer(restart);

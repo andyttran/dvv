@@ -7,7 +7,7 @@ var func = 'element';
 //Upon button press, this function notifies the master
 //it is ready to start
 var clientRdy = function(btn){
-  btn.value = "Computing";
+  btn.innerHTML = 'Computing';
   socket.emit('ready');
   startAnim();
 }
@@ -66,7 +66,7 @@ socket.on('clientChange', function(data) {
 
 socket.on('complete', function(){
   var btn = document.getElementById("rdy");
-  btn.value = "Complete";
+  btn.innerHTML = 'Complete';
   console.log("COMPLETE");
   stopAnim();
 });
