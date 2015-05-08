@@ -2,7 +2,6 @@ var color = '#E1499A';
 var radius = 100;
 var border = 5;
 var padding = 30;
-var step =  0.01;
 var twoPi = Math.PI * 2;
 var formatPercent = d3.format('.0%');
 var boxSize = (radius + padding) * 2;
@@ -61,21 +60,10 @@ var numberText = meter.append('text')
 function updateProgress(progress) {
     foreground.attr('d', arc.endAngle(twoPi * progress));
     front.attr('d', arc.endAngle(twoPi * progress));
-    progress = progress > 100 ? 100 : progress; 
     numberText.text(formatPercent(progress));
 }
 
-function update(startPercent, endPercent) {
-    var count = Math.ceil(Math.abs((endPercent - startPercent) / 0.01));
-    (function loops() {
-        updateProgress(startPercent);
-        if (count > 0) {
-            count--;
-            startPercent += step;
-            setTimeout(loops, 10);
-        }
-    })();
-}
+
 
 
 

@@ -1,7 +1,6 @@
 
 var connectedClients = 0;
 var socket = io.connect();
-var currentProg = 0;
 //Predefined function just returns the element
 var func = 'element';
 
@@ -58,21 +57,18 @@ socket.on('data', function(data) {
 
 socket.on('progress', function(data) {
   startAnim();
-  console.log(data.progress);
-  update(currentProg, data.progress);
-  currentProg = data.progress;
+  updateProgress(data.progress);
 });
 
 socket.on('clientChange', function(data) {
   connectedClients = data.availableClients;
   updateConnected(connectedClients);
   console.log("Clients: ",connectedClients);
-  updateConnected(connectedClients);
+
 });
 
 socket.on('complete', function(){
   var btn = document.getElementById("rdy");
   btn.innerHTML = 'Complete';
-  console.log("COMPLETE");
   stopAnim();
 });
