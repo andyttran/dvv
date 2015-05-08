@@ -40,7 +40,9 @@ h1 {
 }
 
 .connectedCounter {
+  margin:20px auto 0px;
   color:#FFF;
+  text-align:center;
 }
 
 #rdy {
@@ -48,7 +50,7 @@ h1 {
   color:#FFF;
   width:100px;
   display:inherit;
-  margin-bottom:10px;
+  margin:0 auto;
 }
 
 .upperLeft {
@@ -76,7 +78,8 @@ h1 {
 
 #progressBox {
   position:absolute;
-  right:0px;
+  right:20px;
+  top:20px;
 }
 
 .progress-meter text {
