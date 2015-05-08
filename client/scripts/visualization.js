@@ -69,6 +69,15 @@ var stopAnim = function(){
     .gravity(1)
     .friction(0)
 
+    svg.select(".node")
+      .transition()
+      .duration(1000)
+      .ease(Math.sqrt)
+      .attr("r", 2000)
+      .attr('fill', 'none')
+      .style("stroke-opacity", 1e-6)
+      .remove();
+
  svg.style('background-color', 'white');
  svg.transition().style('background-color', 'black').delay(1).duration(500);
 }
