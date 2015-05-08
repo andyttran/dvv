@@ -10,6 +10,9 @@ var io;
 //Path to static files
 var STATIC_PATH = '/';
 
+//Path to routes file
+var ROUTES_PATH = null;
+
 ////Path to favicon icon
 //var FAVICON_PATH = '/favicon.ico';
 
@@ -46,7 +49,12 @@ dvv.config = function(params){
   if('staticPath' in params){
     STATIC_PATH = params.staticPath;
   }
-  //params.hasOwnProperty(faviconPath) &&  FAVICON_PATH = params.faviconPath;
+
+  if('routesPath' in params){
+    ROUTES_PATH = params.routesPath;
+  }
+
+  
   if('timeout' in params){
     TIMEOUT_INTERVAL = params.timeout;
   }
@@ -67,6 +75,7 @@ dvv.config = function(params){
   if('callback' in params){
     CALLBACK = params.callback;
   }
+
   if('clock' in params){
     CLOCK = params.clock;
   }
@@ -93,9 +102,15 @@ dvv.start = function(){
   //app.use(favicon(__dirname + STATIC_PATH));
 
   //Define routes
-  app.get('/', function(req, res){
-    res.render('index');
-  });
+  if(ROUTES_PATH === null){
+    //If no routes path defined, set default to render index on '/' path
+    app.get('/', function(req, res){
+      res.render('index');
+    });
+  } else {
+    // Configure server with custom middleware and routing
+    require(ROUTES_PATH)(app, express, server, io);    
+  }
 
   //Initialize all required data structures
   //Array of sockets of available clients
