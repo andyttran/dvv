@@ -77,9 +77,9 @@ var stopAnim = function(){
       .attr('fill', 'none')
       .style("stroke-opacity", 1e-6)
       .remove();
-
- svg.style('background-color', 'white');
- svg.transition().style('background-color', 'black').delay(1).duration(500);
+      
+ svg.style('background-color', '#FFF');
+ svg.transition().style('background-color', '#000').delay(1).duration(500);
 }
 
 d3.timer(restart);

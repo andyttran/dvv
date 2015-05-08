@@ -1,6 +1,7 @@
 
 var connectedClients = 0;
 var socket = io.connect();
+var currentProg = 0;
 //Predefined function just returns the element
 var func = 'element';
 
@@ -9,6 +10,8 @@ var func = 'element';
 var clientRdy = function(btn){
   btn.innerHTML = 'Computing';
   socket.emit('ready');
+  // socket.emit('ready');
+  // socket.emit('ready');
   startAnim();
 }
 
@@ -56,7 +59,8 @@ socket.on('data', function(data) {
 socket.on('progress', function(data) {
   startAnim();
   console.log(data.progress);
-  updateProgress(data.progress);
+  update(currentProg, data.progress);
+  currentProg = data.progress;
 });
 
 socket.on('clientChange', function(data) {

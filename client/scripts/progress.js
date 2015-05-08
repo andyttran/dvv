@@ -1,25 +1,11 @@
-var colors = {
-    'pink': '#E1499A',
-    'yellow': '#f0ff08',
-    'green': '#47e495'
-};
-
-var color = colors.pink;
-
+var color = '#E1499A';
 var radius = 100;
 var border = 5;
 var padding = 30;
-var startPercent = 0;
-var endPercent = 0.85;
-
-
+var step =  0.01;
 var twoPi = Math.PI * 2;
 var formatPercent = d3.format('.0%');
 var boxSize = (radius + padding) * 2;
-
-
-var count = Math.abs((endPercent - startPercent) / 0.01);
-var step = endPercent < startPercent ? -0.01 : 0.01;
 
 var arc = d3.svg.arc()
     .startAngle(0)
@@ -75,8 +61,21 @@ var numberText = meter.append('text')
 function updateProgress(progress) {
     foreground.attr('d', arc.endAngle(twoPi * progress));
     front.attr('d', arc.endAngle(twoPi * progress));
+    progress = progress > 100 ? 100 : progress; 
     numberText.text(formatPercent(progress));
 }
 
-updateProgress(startPercent);
+function update(startPercent, endPercent) {
+    var count = Math.ceil(Math.abs((endPercent - startPercent) / 0.01));
+    (function loops() {
+        updateProgress(startPercent);
+        if (count > 0) {
+            count--;
+            startPercent += step;
+            setTimeout(loops, 10);
+        }
+    })();
+}
+
+
 

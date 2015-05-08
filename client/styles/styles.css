@@ -22,6 +22,11 @@ background-image: -ms-linear-gradient(bottom, #49404A 0%, #10170C 100%);
 background-image: linear-gradient(to bottom, #49404A 0%, #10170C 100%);*/
 }
 
+#dvv-logo {
+  margin-top: 20px;
+  margin-bottom:20px;
+}
+
 .btn.disabled, .btn[disabled] {
   color:red;
   background:transparent;
