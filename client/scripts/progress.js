@@ -78,4 +78,5 @@ function updateProgress(progress) {
     numberText.text(formatPercent(progress));
 }
 
-var progress = startPercent;
+updateProgress(startPercent);
+
