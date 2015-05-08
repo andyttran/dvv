@@ -14,13 +14,15 @@ var nQueensParallel = function(n) {
   //Find optimal number of rows  
   while(est > upperThreshold){
     est /= n;
-    est > lowerThreshold && rows++;
+    if(est > lowerThreshold){ 
+      rows++;
+    }
   }
 
   var obj = {};
 
   //Create chucks to distribute to slaves
-  obj.partition = createPartition(n, rows);
+  obj.data = createPartition(n, rows);
 
   //Minified version of nQueensSolver function below
   obj.func = function Q(r,i){var n=0;if(void 0===r)return n;var a=function(r,f,t,v){v===i&&n++;for(var o=0;i>o;o++)if(!r[o]){var u=o-v,c=o+v;f[u]||t[c]||(f[u]=!0,t[c]=!0,r[o]=!0,v++,a(r,f,t,v),f[u]=!1,t[c]=!1,r[o]=!1,v--)}};return a.apply(this,r),n};
@@ -86,7 +88,7 @@ function nQueensSolver(initialize, n){
         }
       }
     }
-  }
+  };
 
   //Call internal helper function
   findQ.apply(this, initialize);
@@ -136,7 +138,7 @@ function createPartition(n, rows){
         }
       }
     }
-  }
+  };
 
   findValidChunk({},{},{},0);
   return results;

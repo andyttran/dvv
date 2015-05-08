@@ -69,18 +69,22 @@ MinHeap.prototype.sinkDown = function(n){
         // Look it up and compute its score.
         var child1 = this.storage[child1N];
         // If the score is less than our element's, we need to swap.
-        if (child1.id < element.id)
+        if (child1.id < element.id) {
           swap = child1N;
+        }
       }
       // Do the same checks for the other child.
       if (child2N < length) {
         var child2 = this.storage[child2N];
-        if (child2.id < (swap === null ? element.id : child1.id))
+        if (child2.id < (swap === null ? element.id : child1.id)) {
           swap = child2N;
+        }
       }
 
       // No need to swap further, we are done.
-      if (swap === null) break;
+      if (swap === null) { 
+        break;
+      }
 
       // Otherwise, swap and continue.
       this.storage[n] = this.storage[swap];

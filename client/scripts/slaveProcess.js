@@ -1,38 +1,64 @@
 
-var xhrSuccess = function() {
-  if (this.readyState === 4) {
-    if (this.status === 200) {
-      console.log("RESPONSE TEXT: ", this.responseText);
-      this.callback(JSON.parse(this.responseText));
-    } else {
-      console.error(this.statusText);
-    }
+var connectedClients = 0;
+var socket = io.connect();
+//Predefined function just returns the element
+var func = 'element';
+
+//Upon button press, this function notifies the master
+//it is ready to start
+var clientRdy = function(){
+  socket.emit('ready');
+};
+
+//Upon receiving data, process it
+socket.on('data', function(data) {
+  console.log("data received");
+
+  //Save function if a function was passed in
+  if (data.fn){
+    func = data.fn;
   }
-};
+  
+  //Spawn a new webworker
+  var worker = new Worker('scripts/workerTask.js');
 
-var xhrError = function() {
-  console.error(this.statusText);
-};
+  //Have our slave process listen to when web worker finishes computation
+  worker.addEventListener('message', function(e) {
+    console.log ("Worker has finished computing");
+    //Send the results if successful
+    socket.emit('completed', {
+      "id": data.id,
+      "result": e.data
+    });
+    //Kill the worker
+    worker.terminate();
+  }, false);
 
-var loadChunk = function(url, callback, timeout) {
-  var oReq = new XMLHttpRequest();
-  oReq.callback = callback;
-  oReq.ontimeout = function () {
-    console.error("The request for " + url + " timed out.");
-  };
-  oReq.onload = xhrSuccess;
-  oReq.onerror = xhrError;
-  oReq.open("get", url, true);
-  oReq.timeout = timeout;
-  oReq.send(null);
-};
+  //Have our slave process listen to errors from web worker
+  worker.addEventListener('error', function(e){
+    console.log("Worker has encountered an error with computation");
+    //Send an error message back to master process
+    socket.emit('completed', {
+      "id": -1,
+      "result": null
+    });
+    worker.terminate();
+  }, false);
 
-var outputMsg = function(data) {
-  console.log("JSON inside callback ", data);
-};
+  //Send data to our worker
+  worker.postMessage({fn: func, payload: data.payload});
 
-var getData = function(){
-  loadChunk("/getData", outputMsg, 5000);
-};
+});
 
+socket.on('progress', function(data) {
+  console.log(data.progress);
+});
 
+socket.on('clientChange', function(data) {
+  connectedClients = data.availableClients;
+  console.log("Clients: ",connectedClients);
+});
+
+socket.on('complete', function(){
+  console.log("COMPLETE");
+});

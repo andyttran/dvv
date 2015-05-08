@@ -21,8 +21,8 @@ var TIMEOUT_INTERVAL = 5000;
 //Must be in form of a string with element as the an input parameter for the partition data
 var FUNC = '(function(val){return val;}).apply(this, element)';
 
-//Array of partition data
-var PARTITION = [1, 2, 3];
+//Array of data to partition
+var DATA = [1, 2, 3];
 
 //Length of each partition
 //Default set to 1
@@ -37,9 +37,10 @@ var CALLBACK = function(results){ console.log(results); };
 //For testing purposes
 var CLOCK = false;
 
-
+//Define export dvv object
 var dvv = {};
 
+//Configuration function takes in an object 'params' containing settings for distributed computing
 dvv.config = function(params){
   //TODO: test for correct input params before setting
   if('staticPath' in params){
@@ -50,13 +51,13 @@ dvv.config = function(params){
     TIMEOUT_INTERVAL = params.timeout;
   }
 
-  //TODO: set the function parameters in case they input a native function i.e., 'map'
+  //TODO: account for preset functions such as 'map' or 'reduce'
   if('func' in params){
     FUNC = '(' + params.func + ').apply(this, element)';
   }
 
-  if('partition' in params){
-    PARTITION = params.partition;
+  if('data' in params){
+    DATA = params.data;
   }
 
   if('partitionLength' in params){
@@ -97,9 +98,17 @@ dvv.start = function(){
   });
 
   //Initialize all required data structures
+  //Array of sockets of available clients
   var availableClients = [];
+
+  //Collection of unsent packets prioritized using a min heap
   var unsentPackets = new MinHeap();
+
+  //Collection of send packages that have not been completed
+  //object keys are set to corresponding packet ids
   var pendingPackets = {};
+  
+  //Collection of completed packets prioritized using a min heap
   var completedPackets = new MinHeap();
 
   //Copy global variables
@@ -109,11 +118,15 @@ dvv.start = function(){
 
   //Partition the data into increments based on PARTITION_LENGTH
   var partitionedData = [];
+
+  //For use with functions that require multiple arguments
   if(PARTITION_LENGTH === 0){
-    partitionedData = PARTITION;
+    partitionedData = DATA;
   } else if (PARTITION_LENGTH > 0){
-    for(var i = 0; i < PARTITION.length; i += PARTITION_LENGTH){
-      partitionedData.push(PARTITION.slice(i, Math.min(i + PARTITION_LENGTH, PARTITION.length)));
+
+    //Divide data array into subarrays of specified length
+    for(var i = 0; i < DATA.length; i += PARTITION_LENGTH){
+      partitionedData.push(DATA.slice(i, Math.min(i + PARTITION_LENGTH, DATA.length)));
     }
   }
 
@@ -176,15 +189,14 @@ dvv.start = function(){
         //Set callback funcrion using dvv.config to perform operations on the finished results
         callback(finishedResults);
         
-        /*
-        partitionedData = partitionData(finishedResults);
-        resetProcess();
-        initializeProcess(partitionedData);
-        availableClients.forEach(function(socket){
-          sendNextAvailablePacket(socket);
-        });
-        */
-
+        // //TODO: Move to documentation
+        // partitionedData = partitionData(finishedResults);
+        // resetProcess();
+        // initializeProcess(partitionedData);
+        // availableClients.forEach(function(socket){
+        //   sendNextAvailablePacket(socket);
+        // });
+        
         io.emit('complete');
       } else {
         sendNextAvailablePacket(socket);
@@ -192,9 +204,11 @@ dvv.start = function(){
     });
 
     socket.on('disconnect', function(){
+
       //Remove socket from the list of available clients
       availableClients.splice(availableClients.indexOf(socket), 1);
-      //Notify everyone that client left
+
+      //Notify everyone that a client left
       socket.broadcast.emit('clientChange', { 
         availableClients : availableClients.length 
       });
@@ -205,6 +219,7 @@ dvv.start = function(){
   //Insert the partitioned data into the unsentPackets heap
   function initializeProcess(partitionedData){
     var counter = 0;
+    //Wraps each partitioned data into a packet with an id for tracking
     partitionedData.forEach(function(element){
       var packet = {'id': counter++, 'payload': element};
       unsentPackets.insert(packet);
@@ -231,7 +246,7 @@ dvv.start = function(){
       pendingPackets[nextPacket.id] = nextPacket.payload;
       createTimer(nextPacket.id);
     }
-  };
+  }
 
   //This creates a timer of that will check whether the package
   //is still pending. If it is, it will add it back to the unsent heap
@@ -245,9 +260,9 @@ dvv.start = function(){
       }
     }, TIMEOUT_INTERVAL, packetNumber);
   }
-}
+};
 
-//**************************************************************
+
 //Define minimum heap for storing partition data
 var MinHeap = function(){
   this.storage = [];
@@ -326,12 +341,15 @@ MinHeap.prototype.sinkDown = function(n){
       // Do the same checks for the other child.
       if (child2N < length) {
         var child2 = this.storage[child2N];
-        if (child2.id < (swap === null ? element.id : child1.id))
+        if (child2.id < (swap === null ? element.id : child1.id)){
           swap = child2N;
+        }
       }
 
       // No need to swap further, we are done.
-      if (swap === null) break;
+      if (swap === null) {
+        break;
+      }
 
       // Otherwise, swap and continue.
       this.storage[n] = this.storage[swap];
