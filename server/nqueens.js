@@ -1,8 +1,8 @@
 //An distributed computing version of nqueens solver
 var nQueensParallel = function(n) {
   
-  //Estimate total time in milliseconds based on trial runs
-  var est = 4.9*Math.pow(10, -6)*Math.pow(2.71, 1.6*n);
+  //Estimate total time in milliseconds based on trial runs using exponential curve fit
+  var est = 5*Math.pow(10, -8)*Math.pow(2.71, 1.7*n);
 
   //Threshold for a partitioned slave computation is default set to between 5 and 60 seconds
   var lowerThreshold = 5000;
@@ -13,7 +13,7 @@ var nQueensParallel = function(n) {
   
   //Find optimal number of rows  
   while(est > upperThreshold){
-    est /= n;
+    est /= Math.ceil(n/2);
     if(est > lowerThreshold){ 
       rows++;
     }
@@ -25,123 +25,115 @@ var nQueensParallel = function(n) {
   obj.data = createPartition(n, rows);
 
   //Minified version of nQueensSolver function below
-  obj.func = function Q(r,i){var n=0;if(void 0===r)return n;var a=function(r,f,t,v){v===i&&n++;for(var o=0;i>o;o++)if(!r[o]){var u=o-v,c=o+v;f[u]||t[c]||(f[u]=!0,t[c]=!0,r[o]=!0,v++,a(r,f,t,v),f[u]=!1,t[c]=!1,r[o]=!1,v--)}};return a.apply(this,r),n};
+  obj.func = ""
 
   //Callback function sums up all solutions found
   obj.callback = function(results){
-    var solutions = results.reduce(function(sum, resultChunk){
-      return sum + resultChunk;
+    var solution = results.reduce(function(sum, resultChunk){
+      return sum + (2 * resultChunk);
     }, 0);
-    console.log(solutions);
+    console.log(solution);
   };
 
   return obj;
 };
 
 
-//Un-minified version of dvvNQ.func for reference purposes
+//Un-minified version for reference purposes
   //slave will run this for the chunk data provided
-function nQueensSolver(initialize, n){
-  
-  var solution = 0;
-  
-  //Check if initial perameters have been inputed
-  if(initialize === undefined){
-    return solution;
-  }
+function Q(n, key, major, minor, stack, avail, odd, full, row){
+  solution = 0;
+  var next = 0; //least significant bit
 
-  //This nQueens solution uses objects for constant time lookup
-    //key is an object that stores the columns that have a queen
-    //majorKey is an object that stores the majorKey of added queens
-    //minorKey is an object that stores the minorKey of added queens
-    //length stores the amount of queens on the board
-  var findQ = function(key, majorKey, minorKey, length){
-
-    //A solution is found if length is equal to n
-    if(length === n){ solution++; }
-
-    for(var i = 0; i < n; i++){
-
-      //Check if position has a unique column
-      if(!key[i]){
-        var majorValue = i - length;
-        var minorValue = i + length;
-        
-        //Check if position has a unique major and minor key
-        if(!majorKey[majorValue] && !minorKey[minorValue]){
-
-          //A position with no conflicting row, column, major diagonal, and minor diagonal found
-          majorKey[majorValue] = true;
-          minorKey[minorValue] = true;
-          key[i] = true;
-          length++;
-
-          //Recursively call helper function to find a solution
-          findQ(key, majorKey, minorKey, length);
-
-          //Reset object properties and length for next iteration
-          // Avoid delete properties for faster operation
-          majorKey[majorValue] = false;
-          minorKey[minorValue] = false;
-          key[i] = false;
-          length--; 
-        }
+  while(true){
+    //if no more slots to try for a row
+    //and the row is at 0, then end of while loop
+    //otherwise reverse back the stack by one row
+    if(avail === 0){
+      if(row === 0){ break; }
+      avail = stack[--row]; //reverse state by one  
+    } 
+    else {
+      //set lowest available spot to test
+      next = -avail & avail;
+      avail &= ~next; //toggle off this spot
+      if(row < n-1 ){
+        key[row+1] = key[row] | next;
+        minor[row+1] = (minor[row] | next) >> 1;
+        major[row+1] = (major[row] | next) << 1;
+        stack[row] = avail;
+        row++;
+        avail = full & ~(key[row] | minor[row] | major[row]);
+      } else {
+        //push current state into data array
+        solution++;
+        avail = stack[--row];
       }
     }
-  };
-
-  //Call internal helper function
-  findQ.apply(this, initialize);
-
+  }
   return solution;
 }
 
 
 //This is used to get the partitioned chunks
   //if estimated computation time is less than threshold, does not partition and send out the default case starting case
-  //e.g., dvv.partition[0] = [[{},{},{},0], n]
 function createPartition(n, rows){
-  var results = [];
+  var data = [];
 
-  //Resursively iterate to find a valid a chunk
-  var findValidChunk = function(key, majorKey, minorKey, length){
-    if(length === rows){ 
+  var key = new Uint32Array(n); //key
+  var major = new Uint32Array(n); //major key
+  var minor = new Uint32Array(n); //minor key
+  var stack = new Uint32Array(n); //remembers the state of each row for rewinding
+  var next = 0; //least significant bit
+  var avail = 0; //available positions for a queen
+  var odd = n & 1; //flag if odd or even
+  var full = (1 << n) - 1; //field of 1's
+  var row = 0; //signifies current row
 
-      //Make a copy of the object and stores it into result
-      return results.push(JSON.parse(JSON.stringify([[key, majorKey, minorKey, length], n])));
+  //perform operation twice if n is odd
+  for(var i = 0; i < 1 + odd; i++){
+    if(i === 0){
+      //handle half the board first, ignore middle column if odd
+      //set half the field to 1's
+      avail = (1 << (n >> 1)) - 1;
+    } else {
+      //handle the middle column for odd rows
+      avail = (1 << (n >> 1));
+      key[1] = avail;
+      major[1] = avail << 1;
+      minor[1] = avail >> 1;
+      row = 1;
+      avail = (avail - 1) >> 1;
     }
-    for(var i = 0; i < n; i++){
-      
-      //Check if position has a unique column
-      if(!key[i]){
-        var majorValue = i - length;
-        var minorValue = i + length;
-
-        //Check if position has a unique major and minor key
-        if(!majorKey[majorValue] && !minorKey[minorValue]){
-
-          //A position with no conflicting row, column, major diagonal, and minor diagonal found
-          majorKey[majorValue] = true;
-          minorKey[minorValue] = true;
-          key[i] = true;
-          length++;
-
-          //Recursively call helper function to find a solution
-          findValidChunk(key, majorKey, minorKey, length);
-
-          //Reset object properties and length for next iteration
-          //Delete keys to conserve space
-          delete majorKey[majorValue];
-          delete minorKey[minorValue];
-          delete key[i];
-          length--; 
+    //critical loop
+    while(true){
+      //if no more slots to try for a row
+      //and the row is at 0, then end of while loop
+      //otherwise reverse back the stack by one row
+      if(avail === 0){
+        if(row === 0){ break; }
+        avail = stack[--row]; //reverse state by one  
+      } 
+      else {
+        //set lowest available spot to test
+        next = -avail & avail;
+        avail &= ~next; //toggle off this spot
+        if(row < rows){
+          key[row+1] = key[row] | next;
+          minor[row+1] = (minor[row] | next) >> 1;
+          major[row+1] = (major[row] | next) << 1;
+          stack[row] = avail;
+          row++;
+          avail = full & ~(key[row] | minor[row] | major[row]);
+        } else {
+          //push current state into data array
+          data.push([n, key, major, minor, stack, avail, odd, full, row])
+          avail = stack[--row];
         }
       }
     }
-  };
-
-  findValidChunk({},{},{},0);
-  return results;
+  }
+  return data;
 }
 
 module.exports = nQueensParallel;

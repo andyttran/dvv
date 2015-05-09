@@ -39,18 +39,18 @@ dvv.config({
  clock: true
 });
 
-// //Test 3: nqueens solution
-// nqueens = require('./nqueens.js')(15);
-// //PartitionLength must be set to 0 for functions that require more than 1 argument
-// //Also each set of arguments must be in its own array
-// dvv.config({
-//  staticPath: '/../client',
-//  timeout: 30000,
-//  data: nqueens.data,
-//  partitionLength: 0,
-//  func: nqueens.func,
-//  callback: nqueens.callback,
-//  clock: true
-// });
+//Test 3: nqueens solution
+nqueens = require('./nqueens.js')(15);
+//PartitionLength must be set to 0 for functions that require more than 1 argument
+//Also each set of arguments must be in its own array
+dvv.config({
+ staticPath: '/../client',
+ timeout: 30000,
+ data: nqueens.data,
+ partitionLength: 0,
+ func: nqueens.func,
+ callback: nqueens.callback,
+ clock: true
+});
 
 dvv.start();
