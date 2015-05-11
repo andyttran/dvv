@@ -6,9 +6,14 @@ var func = 'element';
 
 //Upon button press, this function notifies the master
 //it is ready to start
-var clientRdy = function(){
+var clientRdy = function(btn){
+  btn.innerHTML = 'Computing';
   socket.emit('ready');
-};
+  socket.emit('ready');
+  socket.emit('ready');
+  startAnim();
+}
+
 
 //Upon receiving data, process it
 socket.on('data', function(data) {
@@ -51,14 +56,19 @@ socket.on('data', function(data) {
 });
 
 socket.on('progress', function(data) {
-  console.log(data.progress);
+  startAnim();
+  updateProgress(data.progress);
 });
 
 socket.on('clientChange', function(data) {
   connectedClients = data.availableClients;
+  updateConnected(connectedClients);
   console.log("Clients: ",connectedClients);
+
 });
 
 socket.on('complete', function(){
-  console.log("COMPLETE");
+  var btn = document.getElementById("rdy");
+  btn.innerHTML = 'Complete';
+  stopAnim();
 });

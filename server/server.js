@@ -21,22 +21,23 @@ var createMatrixArrays = function(matrixSize, arrayLength){
   return result;
 };
 
+
 //Test 1 : default test case
-dvv.config({
-  staticPath: '/../client',
-  timeout: 10000,
-  clock: true
-});
+// dvv.config({
+//   staticPath: '/../client',
+//   timeout: 10000,
+//   clock: true
+// });
 
 // //Test 2: invert a matrix using math.js's math.inv function imported on client side
 // //partitionLength is set to 1 by default
-// dvv.config({
-//  staticPath: '/../client',
-//  timeout: 10000,
-//  data: createMatrixArrays(10, 10),
-//  func: 'math.inv',
-//  clock: true
-// });
+dvv.config({
+ staticPath: '/../client',
+ timeout: 25000,
+ data: createMatrixArrays(200, 10),
+ func: 'math.inv',
+ clock: true
+});
 
 // //Test 3: nqueens solution
 // nqueens = require('./nqueens.js')(15);

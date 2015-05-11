@@ -1,0 +1,109 @@
+
+html,body {
+  margin:0px;
+  height:100%;
+  padding:0px;
+  overflow:hidden;
+}
+
+body {
+  background-color:#FFF;
+/*background-image: -webkit-gradient(
+  linear,
+  left top,
+  left bottom,
+  color-stop(0, #49404A),
+  color-stop(1, #10170C)
+);
+background-image: -o-linear-gradient(bottom, #49404A 0%, #10170C 100%);
+background-image: -moz-linear-gradient(bottom, #49404A 0%, #10170C 100%);
+background-image: -webkit-linear-gradient(bottom, #49404A 0%, #10170C 100%);
+background-image: -ms-linear-gradient(bottom, #49404A 0%, #10170C 100%);
+background-image: linear-gradient(to bottom, #49404A 0%, #10170C 100%);*/
+}
+
+#dvv-logo {
+  margin-top: 20px;
+  margin-bottom:20px;
+}
+
+.btn.disabled, .btn[disabled] {
+  color:red;
+  background:transparent;
+}
+
+h1 {
+  color:#FFF;
+  width:100px;
+  font-weight:bold;
+
+}
+
+.wrapper {
+  height:100%;
+  background:black;
+}
+
+.connectedCounter {
+  margin:20px auto 0px;
+  color:#FFF;
+  text-align:center;
+}
+
+#rdy {
+  background:transparent;
+  color:#FFF;
+  width:100px;
+  display:inherit;
+  margin:0 auto;
+}
+
+.upperLeft {
+  left:20px;
+  position:absolute;
+
+}
+
+/*.glow {
+    -webkit-filter: drop-shadow( -5px -5px 5px #E1499A );
+            filter: drop-shadow( -5px -5px 5px #E1499A ); /* Same syntax as box-shadow */
+/*}*/
+
+.node {
+  fill: #FFF;
+  -webkit-animation-name: redPulse;
+  -webkit-animation-duration: 2s;
+  -webkit-animation-iteration-count: infinite;
+}
+
+.progress-meter .background {
+    fill: #FFFFFF;
+    fill-opacity: 0.01;
+}
+
+#progressBox {
+  position:absolute;
+  right:20px;
+  top:20px;
+}
+
+.progress-meter text {
+    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+  @-webkit-keyframes redPulse {
+          from {
+            fill: #E1499A;
+            -webkit-box-shadow: 10 10 100px #333; }
+        
+          50% {
+            fill: #fff;
+            -webkit-box-shadow: 10 10 100px #91bd09; }
+        
+          to {
+            fill: #E1499A;
+            -webkit-box-shadow: 10 10 100px #333; } }
+
+
