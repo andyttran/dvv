@@ -1,38 +1,5 @@
-var express = require('express');
-var app = express();
+var dvv = require('./dvv.js');
 
-//Create server
-var server = require('http').createServer(app);
-
-//Create the socket.io instance attached to the express instance
-var io = require('socket.io')(server);
-var port = process.env.PORT || 8000;
-
-var favicon = require('serve-favicon');
-var minHeap = require('./MinHeap.js');
-
-// Start the server
-server.listen(port, function() {
-  console.log('Server listening on port ' + port);
-});
-
-//Tell express where to serve static files from
-app.use(express.static(__dirname + '/../client'));
-
-//TODO: tell express where to find the favicon
-// app.use(favicon(__dirname + '/../client/assets/favicon.ico'));
-
-app.get('/', function(req, res){
-	res.render('index');
-});
-
-//Initialize all data structures we'll need
-var availableClients = [];
-var unsentPackets = new minHeap();
-var pendingPackets = {};
-var completedPackets = new minHeap();
-
-//TODO: potentially get rid of this
 //Function to create arrays for testing purposes
 var createMatrixArrays = function(matrixSize, arrayLength){
   var randomArray = function(n){
@@ -54,6 +21,7 @@ var createMatrixArrays = function(matrixSize, arrayLength){
   return result;
 };
 
+<<<<<<< HEAD
 //TODO: have this interval change based on partition function parameters
 //Timer interval for fault tolerance, can be adjusted or made non constant
 var TIMEOUT_INTERVAL = 5000;
@@ -165,42 +133,16 @@ io.of('/').on('connection', function(socket){
       availableClients : availableClients.length 
     });
 	});
+=======
+// //Test : invert a matrix using math.js's math.inv function imported on client side
+// //partitionLength is set to 1 by default
+dvv.config({
+ staticPath: '/../client',
+ timeout: 25000,
+ data: createMatrixArrays(200, 20),
+ func: 'math.inv',
+ clock: true
+>>>>>>> 4c3e669f769e57cbacf21a9c60f32a25f6ccbe6d
 });
 
-
-//Utility functions TODO: can be all moved out if you wish
-
-//Reset all data structures
-var resetProcess = function(){
-  availableClients = [];
-  unsentPackets = new minHeap();
-  pendingPackets = {};
-  completedPackets = new minHeap();
-}
-
-//Send the next available packet
-var sendNextAvailablePacket = function(socket){
-  if (unsentPackets.size() > 0) {
-    var nextPacket = unsentPackets.getMin();
-    socket.emit('data', {
-      fn: func,
-      id: nextPacket.id,
-      payload: nextPacket.payload
-   });
-    pendingPackets[nextPacket.id] = nextPacket.payload;
-    createTimer(nextPacket.id);
-  }
-};
-
-//This creates a timer of 5 seconds that will check whether the package
-//is still pending. If it is, it will add it back to the unsent heap
-var createTimer = function(packetNumber){
-  setTimeout(function(){
-    if (pendingPackets[packetNumber]){
-      console.log('packet number ' + packetNumber + ' is late!');
-      var packet = {'id': packetNumber, 'payload': pendingPackets[packetNumber]};
-      delete pendingPackets[packetNumber];
-      unsentPackets.insert(packet);
-    }
-  }, TIMEOUT_INTERVAL, packetNumber);
-}
+dvv.start();

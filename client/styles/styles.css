@@ -8,6 +8,7 @@ html,body {
 
 body {
   background-color:#FFF;
+<<<<<<< HEAD
 /*background-image: -webkit-gradient(
   linear,
   left top,
@@ -25,13 +26,28 @@ background-image: linear-gradient(to bottom, #49404A 0%, #10170C 100%);*/
 .btn.disabled, .btn[disabled] {
   color:red;
   background:transparent;
+=======
+>>>>>>> 4c3e669f769e57cbacf21a9c60f32a25f6ccbe6d
 }
 
 h1 {
   color:#FFF;
   width:100px;
   font-weight:bold;
+<<<<<<< HEAD
 
+=======
+}
+
+#dvv-logo {
+  margin-top: 20px;
+  margin-bottom:20px;
+}
+
+.btn.disabled, .btn[disabled] {
+  color:red;
+  background:transparent;
+>>>>>>> 4c3e669f769e57cbacf21a9c60f32a25f6ccbe6d
 }
 
 .wrapper {
@@ -40,7 +56,13 @@ h1 {
 }
 
 .connectedCounter {
+<<<<<<< HEAD
   color:#FFF;
+=======
+  margin:20px auto 0px;
+  color:#FFF;
+  text-align:center;
+>>>>>>> 4c3e669f769e57cbacf21a9c60f32a25f6ccbe6d
 }
 
 #rdy {
@@ -48,7 +70,11 @@ h1 {
   color:#FFF;
   width:100px;
   display:inherit;
+<<<<<<< HEAD
   margin-bottom:10px;
+=======
+  margin:0 auto;
+>>>>>>> 4c3e669f769e57cbacf21a9c60f32a25f6ccbe6d
 }
 
 .upperLeft {
@@ -57,6 +83,7 @@ h1 {
 
 }
 
+<<<<<<< HEAD
 /*.glow {
     -webkit-filter: drop-shadow( -5px -5px 5px #E1499A );
             filter: drop-shadow( -5px -5px 5px #E1499A ); /* Same syntax as box-shadow */
@@ -65,6 +92,10 @@ h1 {
 .node {
   fill: #FFF;
   -webkit-animation-name: redPulse;
+=======
+.flash-node {
+   -webkit-animation-name: redPulse;
+>>>>>>> 4c3e669f769e57cbacf21a9c60f32a25f6ccbe6d
   -webkit-animation-duration: 2s;
   -webkit-animation-iteration-count: infinite;
 }
@@ -76,7 +107,12 @@ h1 {
 
 #progressBox {
   position:absolute;
+<<<<<<< HEAD
   right:0px;
+=======
+  right:20px;
+  top:20px;
+>>>>>>> 4c3e669f769e57cbacf21a9c60f32a25f6ccbe6d
 }
 
 .progress-meter text {
@@ -85,6 +121,7 @@ h1 {
     font-weight: bold;
 }
 
+<<<<<<< HEAD
   @-webkit-keyframes redPulse {
           from {
             fill: #E1499A;
@@ -97,5 +134,19 @@ h1 {
           to {
             fill: #E1499A;
             -webkit-box-shadow: 10 10 100px #333; } }
+=======
+@-webkit-keyframes redPulse {
+  from {
+    fill: #E1499A;
+    -webkit-box-shadow: 10 10 100px #333; }
+
+  50% {
+    fill: #fff;
+    -webkit-box-shadow: 10 10 100px #91bd09; }
+
+  to {
+    fill: #E1499A;
+    -webkit-box-shadow: 10 10 100px #333; } }
+>>>>>>> 4c3e669f769e57cbacf21a9c60f32a25f6ccbe6d
 
 

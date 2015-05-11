@@ -3,8 +3,6 @@ module.exports = function(grunt) {
  
   grunt.initConfig({
       pkg: grunt.file.readJSON('package.json'),
- //     concat: {         
- //     },
       jshint: {
         options: {
           curly: true,
@@ -13,7 +11,7 @@ module.exports = function(grunt) {
           browser: true,
           globals: {jQuery: true}
         },
-        all: ['Gruntfile.js', 'server/**/*.js', 'client/**/*.js']
+        all: ['Gruntfile.js', 'server/*.js', 'client/**/*.js']
       }
   });
 
