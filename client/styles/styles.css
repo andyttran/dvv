@@ -71,7 +71,11 @@ h1 {
 
 .node {
   fill: #FFF;
-  -webkit-animation-name: redPulse;
+
+}
+
+.flash-node {
+   -webkit-animation-name: redPulse;
   -webkit-animation-duration: 2s;
   -webkit-animation-iteration-count: infinite;
 }

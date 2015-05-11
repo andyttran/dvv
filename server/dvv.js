@@ -165,6 +165,7 @@ dvv.start = function(){
     //When client is ready, send them a packet
     socket.on('ready', function() {
       console.log('Client Ready');
+      progressReport();
       sendNextAvailablePacket(socket);
     });
 
@@ -183,9 +184,7 @@ dvv.start = function(){
         //Update everyone on the current progress
         //TODO: perhaps modify to do it only every once in a while
         //to avoid congestion
-        io.emit('progress', { 
-          progress : completedPackets.size() / partitionedData.length
-        });
+        progressReport();
       }
 
       if (completedPackets.size() === partitionedData.length){
@@ -261,6 +260,14 @@ dvv.start = function(){
       pendingPackets[nextPacket.id] = nextPacket.payload;
       createTimer(nextPacket.id);
     }
+  }
+
+  //Broadcast progress to all clients
+  function progressReport(){
+    io.emit('progress', { 
+      progress : completedPackets.size() / partitionedData.length
+    });
+
   }
 
   //This creates a timer of that will check whether the package

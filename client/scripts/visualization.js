@@ -5,6 +5,7 @@ var fill = d3.scale.category20();
 
 var force = d3.layout.force()
     .size([width, height])
+    .nodes([{}])
     .chargeDistance(1000)
     .theta(0.5)
     .on("tick", tick);
@@ -44,17 +45,32 @@ function restart() {
 
 var updateConnected = function(n){
   d3.select('.connectedCounter span').text(n);
-  var sparks = n*50;
+  // var sparks = n*10;
 
-  if (sparks > nodes.length){
-    while (sparks !== nodes.length) {
-      nodes.push({});
-    }
-  } else if (sparks < nodes.length) {
-    while (sparks !== nodes.length) {
-      nodes.pop();
-    }
-  }
+  // if (sparks > nodes.length){
+  //   while (sparks !== nodes.length) {
+  //     nodes.push({});
+  //   }
+  // } else if (sparks < nodes.length) {
+  //   while (sparks !== nodes.length) {
+  //     nodes.pop();
+  //   }
+  // }
+}
+
+var progressAnim = function(){
+   svg.select(".node")
+       .transition()
+      .duration(700)
+      .attr('fill', '#FFF')
+      .ease(Math.sqrt)
+      .attr("r", 2000)
+      .transition()
+      .duration(0)
+      .attr('fill', '#E1499A')
+      .attr("r", 5)
+    nodes.push({});
+    
 
 }
 
@@ -77,9 +93,14 @@ var stopAnim = function(){
       .attr('fill', 'none')
       .style("stroke-opacity", 1e-6)
       .remove();
-      
+
+    svg.selectAll(".node")
+      .attr("class", "flash-node")
+      .attr("r", 15)
+      .attr('stroke-width', 15);
+
  svg.style('background-color', '#FFF');
- svg.transition().style('background-color', '#000').delay(1).duration(500);
+ svg.transition().style('background-color', '#E1499A').delay(1).duration(500);
 }
 
 d3.timer(restart);

@@ -4,6 +4,8 @@ var socket = io.connect();
 //Predefined function just returns the element
 var func = 'element';
 
+var isAnimating = false;
+
 //Upon button press, this function notifies the master
 //it is ready to start
 var clientRdy = function(btn){
@@ -17,8 +19,8 @@ var clientRdy = function(btn){
 
 //Upon receiving data, process it
 socket.on('data', function(data) {
-  console.log("data received");
 
+  progressAnim();
   //Save function if a function was passed in
   if (data.fn){
     func = data.fn;
@@ -56,8 +58,16 @@ socket.on('data', function(data) {
 });
 
 socket.on('progress', function(data) {
-  startAnim();
   updateProgress(data.progress);
+
+  if (data.progress < 1) {
+    if (!isAnimating) {
+      startAnim();
+      isAnimating = true;
+    }
+  } else {
+    stopAnim();
+  }
 });
 
 socket.on('clientChange', function(data) {
@@ -67,8 +77,8 @@ socket.on('clientChange', function(data) {
 
 });
 
-socket.on('complete', function(){
-  var btn = document.getElementById("rdy");
-  btn.innerHTML = 'Complete';
-  stopAnim();
-});
+// socket.on('complete', function(){
+//   var btn = document.getElementById("rdy");
+//   btn.innerHTML = 'Complete';
+//   stopAnim();
+// });
