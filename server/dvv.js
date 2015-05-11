@@ -59,7 +59,6 @@ dvv.config = function(params){
     TIMEOUT_INTERVAL = params.timeout;
   }
 
-  //TODO: account for preset functions such as 'map' or 'reduce'
   if('func' in params){
     FUNC = '(' + params.func + ').apply(this, element)';
   }
@@ -98,7 +97,6 @@ dvv.start = function(){
   //Tell express where to serve static files from
   app.use(express.static(__dirname + STATIC_PATH));
 
-  //TODO: tell express where to find the favicon
   //app.use(favicon(__dirname + STATIC_PATH));
 
   //Define routes
@@ -181,9 +179,8 @@ dvv.start = function(){
         delete pendingPackets[data.id];
         completedPackets.insert(data);
         
-        //Update everyone on the current progress
-        //TODO: perhaps modify to do it only every once in a while
-        //to avoid congestion
+        // Update everyone on the current progress
+        // This can be limited or removed to reduce congestion
         progressReport();
       }
 
@@ -202,14 +199,6 @@ dvv.start = function(){
 
         //Set callback funcrion using dvv.config to perform operations on the finished results
         callback(finishedResults);
-        
-        // //TODO: Move to documentation
-        // partitionedData = partitionData(finishedResults);
-        // resetProcess();
-        // initializeProcess(partitionedData);
-        // availableClients.forEach(function(socket){
-        //   sendNextAvailablePacket(socket);
-        // });
         
         io.emit('complete');
       } else {

@@ -71,7 +71,7 @@ socket.on('progress', function(data) {
 
 // Receives connected client info from server and visualizes it
 socket.on('clientChange', function(data) {
-  connectedClients = data.availableClients;
+  connectedClients = data.availableClients ;
   updateConnected(connectedClients);
 });
 
