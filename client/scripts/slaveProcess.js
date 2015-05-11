@@ -9,8 +9,8 @@ var func = 'element';
 var clientRdy = function(btn){
   btn.innerHTML = 'Computing';
   socket.emit('ready');
-  // socket.emit('ready');
-  // socket.emit('ready');
+  socket.emit('ready');
+  socket.emit('ready');
   startAnim();
 }
 
