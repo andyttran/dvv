@@ -10,6 +10,7 @@ var isAnimating = false;
 //it is ready to start
 var clientRdy = function(btn){
   btn.innerHTML = 'Computing';
+  // emit 3 ready events to the server
   socket.emit('ready');
   socket.emit('ready');
   socket.emit('ready');
@@ -20,7 +21,8 @@ var clientRdy = function(btn){
 //Upon receiving data, process it
 socket.on('data', function(data) {
 
-  progressAnim();
+  // animate the arrival of data with EXPLOSIONS!
+  onDataAnim();
   //Save function if a function was passed in
   if (data.fn){
     func = data.fn;
@@ -57,28 +59,19 @@ socket.on('data', function(data) {
 
 });
 
+// Receives progress info from server and visualizes it.
 socket.on('progress', function(data) {
   updateProgress(data.progress);
-
-  if (data.progress < 1) {
-    if (!isAnimating) {
-      startAnim();
-      isAnimating = true;
-    }
-  } else {
+  // Displays complete animation
+  if (data.progress >= 1) {
     stopAnim();
+    document.getElementById("rdy").innerHTML = 'Complete';
   }
 });
 
+// Receives connected client info from server and visualizes it
 socket.on('clientChange', function(data) {
   connectedClients = data.availableClients;
   updateConnected(connectedClients);
-  console.log("Clients: ",connectedClients);
-
 });
 
-// socket.on('complete', function(){
-//   var btn = document.getElementById("rdy");
-//   btn.innerHTML = 'Complete';
-//   stopAnim();
-// });

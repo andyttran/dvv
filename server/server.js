@@ -34,7 +34,7 @@ var createMatrixArrays = function(matrixSize, arrayLength){
 dvv.config({
  staticPath: '/../client',
  timeout: 25000,
- data: createMatrixArrays(200, 50),
+ data: createMatrixArrays(200, 20),
  func: 'math.inv',
  clock: true
 });

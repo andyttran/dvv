@@ -8,18 +8,12 @@ html,body {
 
 body {
   background-color:#FFF;
-/*background-image: -webkit-gradient(
-  linear,
-  left top,
-  left bottom,
-  color-stop(0, #49404A),
-  color-stop(1, #10170C)
-);
-background-image: -o-linear-gradient(bottom, #49404A 0%, #10170C 100%);
-background-image: -moz-linear-gradient(bottom, #49404A 0%, #10170C 100%);
-background-image: -webkit-linear-gradient(bottom, #49404A 0%, #10170C 100%);
-background-image: -ms-linear-gradient(bottom, #49404A 0%, #10170C 100%);
-background-image: linear-gradient(to bottom, #49404A 0%, #10170C 100%);*/
+}
+
+h1 {
+  color:#FFF;
+  width:100px;
+  font-weight:bold;
 }
 
 #dvv-logo {
@@ -30,13 +24,6 @@ background-image: linear-gradient(to bottom, #49404A 0%, #10170C 100%);*/
 .btn.disabled, .btn[disabled] {
   color:red;
   background:transparent;
-}
-
-h1 {
-  color:#FFF;
-  width:100px;
-  font-weight:bold;
-
 }
 
 .wrapper {
@@ -64,16 +51,6 @@ h1 {
 
 }
 
-/*.glow {
-    -webkit-filter: drop-shadow( -5px -5px 5px #E1499A );
-            filter: drop-shadow( -5px -5px 5px #E1499A ); /* Same syntax as box-shadow */
-/*}*/
-
-.node {
-  fill: #FFF;
-
-}
-
 .flash-node {
    -webkit-animation-name: redPulse;
   -webkit-animation-duration: 2s;
@@ -97,17 +74,17 @@ h1 {
     font-weight: bold;
 }
 
-  @-webkit-keyframes redPulse {
-          from {
-            fill: #E1499A;
-            -webkit-box-shadow: 10 10 100px #333; }
-        
-          50% {
-            fill: #fff;
-            -webkit-box-shadow: 10 10 100px #91bd09; }
-        
-          to {
-            fill: #E1499A;
-            -webkit-box-shadow: 10 10 100px #333; } }
+@-webkit-keyframes redPulse {
+  from {
+    fill: #E1499A;
+    -webkit-box-shadow: 10 10 100px #333; }
+
+  50% {
+    fill: #fff;
+    -webkit-box-shadow: 10 10 100px #91bd09; }
+
+  to {
+    fill: #E1499A;
+    -webkit-box-shadow: 10 10 100px #333; } }
 
 
