@@ -40,7 +40,7 @@ dvv.config({
 });
 
 //Test 3: nqueens solution
-nqueens = require('./nqueens.js')(15);
+nqueens = require('./nqueens.js')(17);
 //PartitionLength must be set to 0 for functions that require more than 1 argument
 //Also each set of arguments must be in its own array
 dvv.config({

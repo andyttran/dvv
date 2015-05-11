@@ -25,7 +25,7 @@ var nQueensParallel = function(n) {
   obj.data = createPartition(n, rows);
 
   //Minified version of nQueensSolver function below
-  obj.func = ""
+  obj.func = "function Q(o,i,n,r,t,u,e,f,l){solution=0;for(var s=0;;)if(0===u){if(0===l)break;u=t[--l]}else s=-u&u,u&=~s,o-1>l?(i[l+1]=i[l]|s,r[l+1]=(r[l]|s)>>1,n[l+1]=(n[l]|s)<<1,t[l]=u,l++,u=f&~(i[l]|r[l]|n[l])):(solution++,u=t[--l]);return solution}"
 
   //Callback function sums up all solutions found
   obj.callback = function(results){
@@ -105,6 +105,10 @@ function createPartition(n, rows){
       row = 1;
       avail = (avail - 1) >> 1;
     }
+
+    if(rows ===0){
+
+    }
     //critical loop
     while(true){
       //if no more slots to try for a row
@@ -116,9 +120,9 @@ function createPartition(n, rows){
       } 
       else {
         //set lowest available spot to test
-        next = -avail & avail;
-        avail &= ~next; //toggle off this spot
         if(row < rows){
+          next = -avail & avail;
+          avail &= ~next; //toggle off this spot
           key[row+1] = key[row] | next;
           minor[row+1] = (minor[row] | next) >> 1;
           major[row+1] = (major[row] | next) << 1;
@@ -127,7 +131,10 @@ function createPartition(n, rows){
           avail = full & ~(key[row] | minor[row] | major[row]);
         } else {
           //push current state into data array
-          data.push([n, key, major, minor, stack, avail, odd, full, row])
+          data.push([n, key, major, minor, stack, avail, odd, full, row]);
+          if(rows === 0){
+            break;
+          }
           avail = stack[--row];
         }
       }
