@@ -52,15 +52,19 @@ var updateConnected = function(n){
 
 // animated explosion when data is received
 var onDataAnim = function(){
-   svg.select(".node")
+  // add another node
+  nodes.push({});
+
+  // animate one to explode!
+  svg.select(".node")
       .transition()
-      .duration(700)
-      .ease(Math.sqrt)
-      .attr("r", 2000)
+      .duration(500)
+      .ease("elastic")
+      .delay(500)
+      .attr("r", 1000)
       .transition()
       .duration(0)
       .attr("r", 5)
-    nodes.push({});
 }
 
 // Change force layout properties for "agitated" state animation
