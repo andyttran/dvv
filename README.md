@@ -158,7 +158,7 @@ and create a custom event for the master process. The master process can then be
 
 
 ##Team Members
-Nick Bailey - Product Owner
+Nate Bailey - Product Owner
 
 Eddie Kong - Technical Lead
 
