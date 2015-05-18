@@ -52,6 +52,8 @@ var updateConnected = function(n){
 
 // animated explosion when data is received
 var onDataAnim = function(){
+
+  console.log("Data Received");
   // add another node
   nodes.push({});
 

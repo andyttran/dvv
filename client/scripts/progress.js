@@ -70,6 +70,7 @@ var numberText = meter.append('text')
 
 // update progress display 
 function updateProgress(progress) {
+    console.log(progress);
     foreground.attr('d', arc.endAngle(twoPi * progress));
     front.attr('d', arc.endAngle(twoPi * progress));
     numberText.text(formatPercent(progress));

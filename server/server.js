@@ -139,7 +139,7 @@ io.of('/').on('connection', function(socket){
 dvv.config({
  staticPath: '/../client',
  timeout: 25000,
- data: createMatrixArrays(200, 20),
+ data: createMatrixArrays(200, 5),
  func: 'math.inv',
  clock: true
 >>>>>>> 4c3e669f769e57cbacf21a9c60f32a25f6ccbe6d
