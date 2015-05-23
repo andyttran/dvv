@@ -41,23 +41,24 @@ var nQueensParallel = function(n) {
 
 //Un-minified version for reference purposes
   //slave will run this for the chunk data provided
-function Q(n, key, major, minor, stack, avail, odd, full, row){
-  solution = 0;
+function Q(n, row, key, major, minor, stack, avail, full){
+  var solution = 0; //initiate solution count;
   var next = 0; //least significant bit
+  var rowBreak = Math.max(0, row - 1); //compute row to break
 
-  while(true){
+  while(row > rowBreak){
     //if no more slots to try for a row
     //and the row is at 0, then end of while loop
     //otherwise reverse back the stack by one row
     if(avail === 0){
-      if(row === 0){ break; }
+      if(row <= rowBreak + 1 ){ break; }
       avail = stack[--row]; //reverse state by one  
     } 
     else {
-      //set lowest available spot to test
-      next = -avail & avail;
-      avail &= ~next; //toggle off this spot
       if(row < n-1 ){
+        //set lowest available spot to test
+        next = -avail & avail;
+        avail &= ~next; //toggle off this spot
         key[row+1] = key[row] | next;
         minor[row+1] = (minor[row] | next) >> 1;
         major[row+1] = (major[row] | next) << 1;
@@ -78,6 +79,8 @@ function Q(n, key, major, minor, stack, avail, odd, full, row){
 //This is used to get the partitioned chunks
   //if estimated computation time is less than threshold, does not partition and send out the default case starting case
 function createPartition(n, rows){
+  //TODO: ensure rows < n
+
   var data = [];
 
   var key = new Uint32Array(n); //key
@@ -104,11 +107,10 @@ function createPartition(n, rows){
       minor[1] = avail >> 1;
       row = 1;
       avail = (avail - 1) >> 1;
+
+      //stack is already set at zero, no declaration required
     }
 
-    if(rows ===0){
-
-    }
     //critical loop
     while(true){
       //if no more slots to try for a row
@@ -131,7 +133,7 @@ function createPartition(n, rows){
           avail = full & ~(key[row] | minor[row] | major[row]);
         } else {
           //push current state into data array
-          data.push([n, key, major, minor, stack, avail, odd, full, row]);
+          data.push([n, row, Array.prototype.slice.apply(key), Array.prototype.slice.apply(major), Array.prototype.slice.apply(minor), Array.prototype.slice.apply(stack), avail, full]);
           if(rows === 0){
             break;
           }
